@@ -1,0 +1,25 @@
+{
+    "constructors": {
+      "Mattijn": ["Red Bull", "McLaren", "Mercedes"],
+      "Kasper": ["Red Bull", "Ferrari", "McLaren"]
+    },
+    "drivers": {
+      "top3": {
+        "Mattijn": ["Max Verstappen", "Lando Norris", "Charles Leclerc"],
+        "Kasper": ["Max Verstappen", "Carlos Sainz", "Lando Norris"]
+      },
+      "lastDriver": {
+        "Mattijn": "Logan Sargeant",
+        "Kasper": "Kevin Magnussen"
+      }
+    },
+    "dnfs": {
+      "Mattijn": "Lance Stroll",
+      "Kasper": "Valteri Bottas"
+    },
+    "leastDnfs": {
+      "Mattijn": "Lando Norris",
+      "Kasper": "Max Verstappen"
+    }
+  }
+  
