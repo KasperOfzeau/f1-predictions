@@ -26,6 +26,16 @@
     "leastDnfs": {
       "Mattijn": "Lando Norris",
       "Kasper": "Max Verstappen"
+    },
+    "polesMax": {
+      "Mattijn": 16,
+      "Kasper": 20,
+      "Current": 8
+    },
+    "safetyCars": {
+      "Mattijn": 12,
+      "Kasper": 11,
+      "Current": 8
     }
   }
   
