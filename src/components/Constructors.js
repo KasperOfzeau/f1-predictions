@@ -5,7 +5,7 @@ const Constructors = ({ predictions, currentStandings }) => {
   const lastConstructor = currentStandings[currentStandings.length - 1]?.name;
 
   return (
-    <div className="m-8 p-4 border-2 border-red-500 rounded-lg bg-gray-800 text-white">
+    <div className="mb-8 p-4 border-2 border-red-500 rounded-lg bg-gray-800 text-white">
       <h2 className="text-2xl font-semibold mb-4 text-red-500">Constructors</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>

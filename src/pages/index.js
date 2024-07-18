@@ -94,7 +94,7 @@ export default function Home({ predictions, currentConstructorStandings, current
           </div>
         </div>
       </nav>
-      <main className="flex-grow p-4">
+      <main className="flex-grow p-5">
         <h1 className="text-3xl font-bold mb-8 font-formula1 text-red-500">F1 2024 Predictions vs Current Standings</h1>
         <Constructors predictions={predictions.constructors} currentStandings={currentConstructorStandings} />
         <Drivers predictions={predictions.drivers} currentStandings={currentDriverStandings} />
