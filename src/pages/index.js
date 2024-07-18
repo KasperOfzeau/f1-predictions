@@ -36,7 +36,7 @@ export default function Home({ predictions, currentConstructorStandings, current
   };
 
   return (
-    <div className="bg-gray-900 text-white">
+    <div className="bg-gray-900 text-white text-base">
       <Head>
         <title>F1 2024 Predictions vs Current Standings</title>
       </Head>

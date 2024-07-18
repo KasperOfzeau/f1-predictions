@@ -20,7 +20,7 @@ const DNFs = ({ predictions, leastDnfs, top3MostDNFDrivers, top3LeastDNFDrivers 
           </div>
           <div>
             <h3 className="text-xl font-semibold mb-2">Current Top 3 Most DNFs</h3>
-            <ol className="list-decimal pl-6">
+            <ol className="list-decimal pl-7">
               {top3MostDNFDrivers.map((driver, index) => (
                 <li key={index}>{driver.driver} - {driver.count} DNFs</li>
               ))}
@@ -39,7 +39,7 @@ const DNFs = ({ predictions, leastDnfs, top3MostDNFDrivers, top3LeastDNFDrivers 
           </div>
           <div>
             <h3 className="text-xl font-semibold mb-2">Current Top 3 Least DNFs</h3>
-            <ol className="list-decimal pl-6">
+            <ol className="list-decimal pl-7">
               {top3LeastDNFDrivers.map((driver, index) => (
                 <li key={index}>{driver.driver} - {driver.count} DNFs</li>
               ))}

@@ -9,7 +9,7 @@ const Constructors = ({ predictions, currentStandings }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h3 className="text-xl font-semibold mb-2">Mattijn's Predictions</h3>
-          <ol className="list-decimal pl-6">
+          <ol className="list-decimal pl-7">
             {predictions.Mattijn.map((team, index) => (
               <li key={index} className={`mb-1 ${isCorrectPrediction(team, index) ? 'text-green-500' : ''}`}>
                 {team}
@@ -19,7 +19,7 @@ const Constructors = ({ predictions, currentStandings }) => {
         </div>
         <div>
           <h3 className="text-xl font-semibold mb-2">Kasper's Predictions</h3>
-          <ol className="list-decimal pl-6">
+          <ol className="list-decimal pl-7">
             {predictions.Kasper.map((team, index) => (
               <li key={index} className={`mb-1 ${isCorrectPrediction(team, index) ? 'text-green-500' : ''}`}>
                 {team}
@@ -29,7 +29,7 @@ const Constructors = ({ predictions, currentStandings }) => {
         </div>
         <div>
           <h3 className="text-xl font-semibold mb-2">Current Standings</h3>
-          <ul className="list-decimal pl-6">
+          <ul className="list-decimal pl-7">
             {currentStandings.slice(0, 3).map((team, index) => (
               <li key={index} className="mb-1">
                 {team.name} - {team.points} points
