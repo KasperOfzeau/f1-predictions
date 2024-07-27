@@ -1,17 +1,18 @@
-import Head from 'next/head';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { fetchCurrentStandings, fetchCurrentDriverStandings, fetchDriverDNFs } from '../../lib/fetchData';
-import { comparePredictions, isCorrectLeastDNFPrediction, calculateTotalScore } from '../../lib/utils';
+import { fetchCurrentStandings, fetchCurrentDriverStandings } from '../../lib/fetchData';
+import { comparePredictions, calculateTotalScore } from '../../lib/utils';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import Constructors from '../components/Constructors';
 import Drivers from '../components/Drivers';
-import DNFs from '../components/DNFs';
-import TotalScore from '../components/TotalScore';
 import Poles from '../components/Poles';
 import SafetyCars from '../components/SafetyCars';
+import TotalScore from '../components/TotalScore';
+import DNFs from '../components/DNFs';
+import { compareGrid2025Predictions } from '../../lib/grid2025Utils';
 
-export default function Home({ predictions, currentConstructorStandings, currentDriverStandings, top3MostDNFDrivers, top3LeastDNFDrivers }) {
+export default function Home({ predictions, currentConstructorStandings, currentDriverStandings, grid2025Scores, currentMostDNF, currentLeastDNF }) {
   const safetyCarsDifferenceMattijn = Math.abs(predictions.safetyCars.Mattijn - predictions.safetyCars.Current);
   const safetyCarsDifferenceKasper = Math.abs(predictions.safetyCars.Kasper - predictions.safetyCars.Current);
   const safetyCarsClosest = safetyCarsDifferenceMattijn < safetyCarsDifferenceKasper ? 'Mattijn' : 'Kasper';
@@ -20,26 +21,21 @@ export default function Home({ predictions, currentConstructorStandings, current
   const polesDifferenceKasper = Math.abs(predictions.polesMax.Kasper - predictions.polesMax.Current);
   const polesClosest = polesDifferenceMattijn < polesDifferenceKasper ? 'Mattijn' : 'Kasper';
 
-  const totalScore = calculateTotalScore(predictions, currentConstructorStandings, currentDriverStandings, top3MostDNFDrivers, top3LeastDNFDrivers, polesClosest, safetyCarsClosest);
+  const totalScore = calculateTotalScore(predictions, currentConstructorStandings, currentDriverStandings, polesClosest, safetyCarsClosest, grid2025Scores, currentMostDNF, currentLeastDNF);
 
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col">
-      <Head>
-        <title>F1 2024 Predictions vs Current Standings</title>
-      </Head>
       <Navbar />
       <main className="flex-grow p-4">
         <h1 className="text-3xl font-bold mb-8 font-formula1 text-red-500">F1 2024 Predictions vs Current Standings</h1>
         <Constructors predictions={predictions.constructors} currentStandings={currentConstructorStandings} />
         <Drivers predictions={predictions.drivers} currentStandings={currentDriverStandings} />
-        <DNFs predictions={predictions.dnfs} leastDnfs={predictions.leastDnfs} top3MostDNFDrivers={top3MostDNFDrivers} top3LeastDNFDrivers={top3LeastDNFDrivers} />
+        <DNFs predictions={predictions.dnfs} leastDnfs={predictions.leastDnfs} currentMostDNF={currentMostDNF} currentLeastDNF={currentLeastDNF} />
         <Poles predictions={predictions} polesClosest={polesClosest} />
         <SafetyCars predictions={predictions} safetyCarsClosest={safetyCarsClosest} />
         <TotalScore totalScore={totalScore} />
       </main>
-      <footer className="mt-8 p-4 border-t-2 border-red-500 bg-gray-800 text-white text-center">
-        <p>Data provided by the <a href="https://ergast.com/mrd/" className="text-red-500 hover:underline">Ergast Motor Racing Data API</a>.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
@@ -48,32 +44,31 @@ export async function getServerSideProps() {
   // Fetch current standings from the API
   const currentConstructorStandings = await fetchCurrentStandings();
   const currentDriverStandings = await fetchCurrentDriverStandings();
-  const { top3MostDNFDrivers, top3LeastDNFDrivers } = await fetchDriverDNFs();
 
   // Read predictions from the JSON file
   const filePath = path.join(process.cwd(), 'public', 'predictions.json');
   const jsonData = await fs.readFile(filePath, 'utf-8');
   const predictions = JSON.parse(jsonData);
 
-  // Format driver standings for comparison
-  const formattedDriverStandings = currentDriverStandings.map(driver => ({
-    name: `${driver.Driver.givenName} ${driver.Driver.familyName}`,
-    points: driver.points,
-  }));
+  // Read 2025 grid predictions and actual grid from JSON files
+  const predictionsPath = path.join(process.cwd(), 'public', 'gridPredictions.json');
+  const actualGridPath = path.join(process.cwd(), 'public', '2025grid.json');
+  const predictionsData = await fs.readFile(predictionsPath, 'utf-8');
+  const actualGridData = await fs.readFile(actualGridPath, 'utf-8');
+  const grid2025Predictions = JSON.parse(predictionsData);
+  const actualGrid = JSON.parse(actualGridData);
 
-  // Format constructor standings for comparison
-  const formattedConstructorStandings = currentConstructorStandings.map(constructor => ({
-    name: constructor.Constructor.name,
-    points: constructor.points,
-  }));
+  // Calculate the 2025 grid scores
+  const grid2025Scores = compareGrid2025Predictions(grid2025Predictions, actualGrid);
 
   return {
     props: {
       predictions,
-      currentConstructorStandings: formattedConstructorStandings,
-      currentDriverStandings: formattedDriverStandings,
-      top3MostDNFDrivers: top3MostDNFDrivers || [],
-      top3LeastDNFDrivers: top3LeastDNFDrivers || [],
+      currentConstructorStandings,
+      currentDriverStandings,
+      grid2025Scores,
+      currentMostDNF: predictions.dnfs.Current,
+      currentLeastDNF: predictions.leastDnfs.Current,
     },
   };
 }

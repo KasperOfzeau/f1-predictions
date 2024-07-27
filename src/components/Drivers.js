@@ -1,8 +1,9 @@
 import React from 'react';
 
 const Drivers = ({ predictions, currentStandings }) => {
-  const isCorrectPrediction = (prediction, index) => prediction === currentStandings[index]?.name;
-  const lastDriver = currentStandings[currentStandings.length - 1]?.name;
+  const isCorrectPrediction = (prediction, index) => prediction === currentStandings[index]?.driver;
+
+  const lastDriver = currentStandings[currentStandings.length - 1]?.driver;
 
   return (
     <div className="mb-8 p-4 border-2 border-red-500 rounded-lg bg-gray-800 text-white">
@@ -33,9 +34,12 @@ const Drivers = ({ predictions, currentStandings }) => {
           <ol className="list-decimal pl-7">
             {currentStandings.slice(0, 3).map((driver, index) => (
               <li key={index} className="mb-1">
-                {driver.name} - {driver.points} points
+                {driver.driver} - {driver.points} points
               </li>
             ))}
+            <li className="mb-1">
+              {lastDriver} - {currentStandings[currentStandings.length - 1]?.points} points
+            </li>
           </ol>
         </div>
       </div>

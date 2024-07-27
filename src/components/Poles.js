@@ -9,8 +9,6 @@ const Poles = ({ predictions, polesClosest }) => {
         <div>
           <p>Mattijn's Prediction: <span className={`${polesClosest === 'Mattijn' ? 'text-green-500' : ''}`}>{predictions.polesMax.Mattijn}</span></p>
           <p>Kasper's Prediction: <span className={`${polesClosest === 'Kasper' ? 'text-green-500' : ''}`}>{predictions.polesMax.Kasper}</span></p>
-        </div>
-        <div>
           <p>Current: {predictions.polesMax.Current}</p>
         </div>
       </div>

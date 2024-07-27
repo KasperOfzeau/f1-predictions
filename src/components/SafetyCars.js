@@ -9,8 +9,6 @@ const SafetyCars = ({ predictions, safetyCarsClosest }) => {
         <div>
           <p>Mattijn's Prediction: <span className={`${safetyCarsClosest === 'Mattijn' ? 'text-green-500' : ''}`}>{predictions.safetyCars.Mattijn}</span></p>
           <p>Kasper's Prediction: <span className={`${safetyCarsClosest === 'Kasper' ? 'text-green-500' : ''}`}>{predictions.safetyCars.Kasper}</span></p>
-        </div>
-        <div>
           <p>Current: {predictions.safetyCars.Current}</p>
         </div>
       </div>

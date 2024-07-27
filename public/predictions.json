@@ -21,11 +21,13 @@
     },
     "dnfs": {
       "Mattijn": "Lance Stroll",
-      "Kasper": "Valtteri Bottas"
+      "Kasper": "Valtteri Bottas",
+      "Current": "Alexander Albon"
     },
     "leastDnfs": {
       "Mattijn": "Lando Norris",
-      "Kasper": "Max Verstappen"
+      "Kasper": "Max Verstappen",
+      "Current": "Oscar Piastri"
     },
     "polesMax": {
       "Mattijn": 16,

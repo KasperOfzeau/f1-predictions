@@ -1,8 +1,9 @@
 import React from 'react';
 
 const Constructors = ({ predictions, currentStandings }) => {
-  const isCorrectPrediction = (prediction, index) => prediction === currentStandings[index]?.name;
-  const lastConstructor = currentStandings[currentStandings.length - 1]?.name;
+  const isCorrectPrediction = (prediction, index) => prediction === currentStandings[index]?.constructor;
+
+  const lastConstructor = currentStandings[currentStandings.length - 1]?.constructor;
 
   return (
     <div className="mb-8 p-4 border-2 border-red-500 rounded-lg bg-gray-800 text-white">
@@ -33,10 +34,10 @@ const Constructors = ({ predictions, currentStandings }) => {
           <ol className="list-decimal pl-7">
             {currentStandings.slice(0, 3).map((constructor, index) => (
               <li key={index} className="mb-1">
-                {constructor.name} - {constructor.points} points
+                {constructor.constructor} - {constructor.points} points
               </li>
             ))}
-            <li className="mb-1">
+            <li key="10" className="pt-3 ml-[-1.75rem] before:content-['10.'] before:mr-1 list-none">
               {lastConstructor} - {currentStandings[currentStandings.length - 1]?.points} points
             </li>
           </ol>
