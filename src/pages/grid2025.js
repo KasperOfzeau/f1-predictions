@@ -2,9 +2,10 @@ import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import { promises as fs } from 'fs';
 import path from 'path';
+import Footer from '@/components/Footer';
 
 export default function Grid2025({ predictions, actualGrid, totalScore }) {
-  const comparePredictions = (predictions, actualGrid) => {
+  const comparePredictionsGrid = (predictions, actualGrid) => {
     let score = { Kasper: 0, Mattijn: 0 };
     let results = { Kasper: {}, Mattijn: {} };
 
@@ -29,11 +30,11 @@ export default function Grid2025({ predictions, actualGrid, totalScore }) {
     return { score, results };
   };
 
-  const { score: scores, results } = comparePredictions(predictions, actualGrid);
+  const { score: scores, results } = comparePredictionsGrid(predictions, actualGrid);
 
   const renderTable = (title, person) => (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold mb-4 text-red-500">{title}</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-center text-red-500">{title}</h2>
       <table className="table-auto w-full text-left text-xs">
         <thead>
           <tr>
@@ -65,12 +66,12 @@ export default function Grid2025({ predictions, actualGrid, totalScore }) {
         <title>F1 2025 Grid Prediction</title>
       </Head>
       <Navbar />
-      <main className="flex-grow p-8">
-        <h1 className="text-3xl font-bold mb-8 font-formula1 text-red-500">F1 2025 Grid Prediction</h1>
+      <main className="flex-grow py-8">
+        <h1 className="text-3xl font-bold mb-8 mx-4 font-formula1 text-red-500">F1 2025 Grid Prediction</h1>
         {renderTable("Kasper's Predictions", 'Kasper')}
         {renderTable("Mattijn's Predictions", 'Mattijn')}
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-red-500">Actual Grid</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-center text-red-500">Actual Grid</h2>
           <table className="table-auto w-full text-left text-xs">
             <thead>
               <tr>
@@ -90,20 +91,8 @@ export default function Grid2025({ predictions, actualGrid, totalScore }) {
             </tbody>
           </table>
         </div>
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-red-500">Scores</h2>
-          <p>Kasper: {scores.Kasper} points</p>
-          <p>Mattijn: {scores.Mattijn} points</p>
-        </div>
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-red-500">Total Scores</h2>
-          <p>Kasper: {totalScore.Kasper + scores.Kasper} points</p>
-          <p>Mattijn: {totalScore.Mattijn + scores.Mattijn} points</p>
-        </div>
       </main>
-      <footer className="mt-8 p-4 border-t-2 border-red-500 bg-gray-800 text-white text-center">
-        <p>Data provided by the <a href="https://ergast.com/mrd/" className="text-red-500 hover:underline">Ergast Motor Racing Data API</a>.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
