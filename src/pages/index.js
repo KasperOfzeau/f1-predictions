@@ -1,5 +1,6 @@
-import { promises as fs } from 'fs';
+import { query } from '../../lib/db';
 import path from 'path';
+import { promises as fs } from 'fs';
 import { fetchCurrentStandings, fetchCurrentDriverStandings } from '../../lib/fetchData';
 import { comparePredictions, calculateTotalScore } from '../../lib/utils';
 import Navbar from '../components/Navbar';
@@ -13,12 +14,12 @@ import DNFs from '../components/DNFs';
 import { compareGrid2025Predictions } from '../../lib/grid2025Utils';
 
 export default function Home({ predictions, currentConstructorStandings, currentDriverStandings, grid2025Scores, currentMostDNF, currentLeastDNF }) {
-  const safetyCarsDifferenceMattijn = Math.abs(predictions.safetyCars.Mattijn - predictions.safetyCars.Current);
-  const safetyCarsDifferenceKasper = Math.abs(predictions.safetyCars.Kasper - predictions.safetyCars.Current);
+  const safetyCarsDifferenceMattijn = Math.abs(predictions.safetyCar.safetyCars.Mattijn - predictions.safetyCar.safetyCars.Current);
+  const safetyCarsDifferenceKasper = Math.abs(predictions.safetyCar.safetyCars.Kasper - predictions.safetyCar.safetyCars.Current);
   const safetyCarsClosest = safetyCarsDifferenceMattijn < safetyCarsDifferenceKasper ? 'Mattijn' : 'Kasper';
 
-  const polesDifferenceMattijn = Math.abs(predictions.polesMax.Mattijn - predictions.polesMax.Current);
-  const polesDifferenceKasper = Math.abs(predictions.polesMax.Kasper - predictions.polesMax.Current);
+  const polesDifferenceMattijn = Math.abs(predictions.poles.polesMax.Mattijn - predictions.poles.polesMax.Current);
+  const polesDifferenceKasper = Math.abs(predictions.poles.polesMax.Kasper - predictions.poles.polesMax.Current);
   const polesClosest = polesDifferenceMattijn < polesDifferenceKasper ? 'Mattijn' : 'Kasper';
 
   const totalScore = calculateTotalScore(predictions, currentConstructorStandings, currentDriverStandings, polesClosest, safetyCarsClosest, grid2025Scores, currentMostDNF, currentLeastDNF);
@@ -30,7 +31,7 @@ export default function Home({ predictions, currentConstructorStandings, current
         <h1 className="text-3xl font-bold mb-8 font-formula1 text-red-500">F1 2024 Predictions vs Current Standings</h1>
         <Constructors predictions={predictions.constructors} currentStandings={currentConstructorStandings} />
         <Drivers predictions={predictions.drivers} currentStandings={currentDriverStandings} />
-        <DNFs predictions={predictions.dnfs} leastDnfs={predictions.leastDnfs} currentMostDNF={currentMostDNF} currentLeastDNF={currentLeastDNF} />
+        <DNFs mostDnfs={predictions.dnfs.mostDnfs} leastDnfs={predictions.dnfs.leastDnfs} currentMostDNF={currentMostDNF} currentLeastDNF={currentLeastDNF} />
         <Poles predictions={predictions} polesClosest={polesClosest} />
         <SafetyCars predictions={predictions} safetyCarsClosest={safetyCarsClosest} />
         <TotalScore totalScore={totalScore} />
@@ -45,12 +46,41 @@ export async function getServerSideProps() {
   const currentConstructorStandings = await fetchCurrentStandings();
   const currentDriverStandings = await fetchCurrentDriverStandings();
 
-  // Read predictions from the JSON file
-  const filePath = path.join(process.cwd(), 'public', 'predictions.json');
-  const jsonData = await fs.readFile(filePath, 'utf-8');
-  const predictions = JSON.parse(jsonData);
+  // Fetch predictions from the database
+  const predictionsResult = await query(`
+    SELECT u.name, p.category, p.sub_category, p.prediction
+    FROM predictions p
+    JOIN users u ON p.user_id = u.id;
+  `);
 
-  // Read 2025 grid predictions and actual grid from JSON files
+  // Fetch current values from the database
+  const currentValuesResult = await query(`
+    SELECT category, value
+    FROM current_values;
+  `);
+
+  // Parse predictions and current values
+  const predictions = {};
+  predictionsResult.rows.forEach(row => {
+    if (!predictions[row.category]) {
+      predictions[row.category] = {};
+    }
+    if (!predictions[row.category][row.sub_category]) {
+      predictions[row.category][row.sub_category] = {};
+    }
+    predictions[row.category][row.sub_category][row.name] = row.prediction;
+  });
+
+  const currentValues = {};
+  currentValuesResult.rows.forEach(row => {
+    const [category, subCategory] = row.category.split('_');
+    if (!currentValues[category]) {
+      currentValues[category] = {};
+    }
+    currentValues[category][subCategory] = row.value;
+  });
+
+  // Read 2025 grid predictions and actual grid from JSON files (assuming they are still stored in JSON files)
   const predictionsPath = path.join(process.cwd(), 'public', 'gridPredictions.json');
   const actualGridPath = path.join(process.cwd(), 'public', '2025grid.json');
   const predictionsData = await fs.readFile(predictionsPath, 'utf-8');
@@ -67,8 +97,8 @@ export async function getServerSideProps() {
       currentConstructorStandings,
       currentDriverStandings,
       grid2025Scores,
-      currentMostDNF: predictions.dnfs.Current,
-      currentLeastDNF: predictions.leastDnfs.Current,
+      currentMostDNF: currentValues.dnfs.mostDnfs,
+      currentLeastDNF: currentValues.dnfs.leastDnfs,
     },
   };
 }

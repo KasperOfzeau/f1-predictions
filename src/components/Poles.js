@@ -7,9 +7,9 @@ const Poles = ({ predictions, polesClosest }) => {
       <p className='mb-4'>(Who's closest)</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <p>Mattijn's Prediction: <span className={`${polesClosest === 'Mattijn' ? 'text-green-500' : ''}`}>{predictions.polesMax.Mattijn}</span></p>
-          <p>Kasper's Prediction: <span className={`${polesClosest === 'Kasper' ? 'text-green-500' : ''}`}>{predictions.polesMax.Kasper}</span></p>
-          <p>Current: {predictions.polesMax.Current}</p>
+          <p>Mattijn's Prediction: <span className={`${polesClosest === 'Mattijn' ? 'text-green-500' : ''}`}>{predictions.poles.polesMax.Mattijn}</span></p>
+          <p>Kasper's Prediction: <span className={`${polesClosest === 'Kasper' ? 'text-green-500' : ''}`}>{predictions.poles.polesMax.Kasper}</span></p>
+          <p>Current: {predictions.poles.polesMax.Current}</p>
         </div>
       </div>
     </div>

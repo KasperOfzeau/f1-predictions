@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DNFs = ({ predictions, leastDnfs, currentMostDNF, currentLeastDNF }) => {
+const DNFs = ({ mostDnfs, leastDnfs, currentMostDNF, currentLeastDNF }) => {
   const isCorrectPrediction = (prediction, current) => {
     return prediction === current;
   };
@@ -12,11 +12,11 @@ const DNFs = ({ predictions, leastDnfs, currentMostDNF, currentLeastDNF }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-xl font-semibold mb-2">Mattijn's Prediction</h3>
-            <p className={isCorrectPrediction(predictions.Mattijn, currentMostDNF) ? 'text-green-500' : ''}>{predictions.Mattijn}</p>
+            <p className={isCorrectPrediction(mostDnfs.Mattijn, currentMostDNF) ? 'text-green-500' : ''}>{mostDnfs.Mattijn}</p>
           </div>
           <div>
             <h3 className="text-xl font-semibold mb-2">Kasper's Prediction</h3>
-            <p className={isCorrectPrediction(predictions.Kasper, currentMostDNF) ? 'text-green-500' : ''}>{predictions.Kasper}</p>
+            <p className={isCorrectPrediction(mostDnfs.Kasper, currentMostDNF) ? 'text-green-500' : ''}>{mostDnfs.Kasper}</p>
           </div>
           <div>
             <h3 className="text-xl font-semibold mb-2">Current Most DNFs</h3>

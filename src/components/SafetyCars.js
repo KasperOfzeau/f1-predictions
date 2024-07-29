@@ -7,9 +7,9 @@ const SafetyCars = ({ predictions, safetyCarsClosest }) => {
       <p className='mb-4'>(Who's closest)</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <p>Mattijn's Prediction: <span className={`${safetyCarsClosest === 'Mattijn' ? 'text-green-500' : ''}`}>{predictions.safetyCars.Mattijn}</span></p>
-          <p>Kasper's Prediction: <span className={`${safetyCarsClosest === 'Kasper' ? 'text-green-500' : ''}`}>{predictions.safetyCars.Kasper}</span></p>
-          <p>Current: {predictions.safetyCars.Current}</p>
+          <p>Mattijn's Prediction: <span className={`${safetyCarsClosest === 'Mattijn' ? 'text-green-500' : ''}`}>{predictions.safetyCar.safetyCars.Mattijn}</span></p>
+          <p>Kasper's Prediction: <span className={`${safetyCarsClosest === 'Kasper' ? 'text-green-500' : ''}`}>{predictions.safetyCar.safetyCars.Kasper}</span></p>
+          <p>Current: {predictions.safetyCar.safetyCars.Current}</p>
         </div>
       </div>
     </div>
