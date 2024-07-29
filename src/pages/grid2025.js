@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import { promises as fs } from 'fs';
 import path from 'path';
-import Footer from '@/components/Footer';
+import Footer from '../components/Footer';
 
 export default function Grid2025({ predictions, actualGrid, totalScore }) {
   const comparePredictionsGrid = (predictions, actualGrid) => {
