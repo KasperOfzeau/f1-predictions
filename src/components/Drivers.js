@@ -37,9 +37,6 @@ const Drivers = ({ predictions, currentStandings }) => {
                 {driver.driver} - {driver.points} points
               </li>
             ))}
-            <li className="mb-1">
-              {lastDriver} - {currentStandings[currentStandings.length - 1]?.points} points
-            </li>
           </ol>
         </div>
       </div>

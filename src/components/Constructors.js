@@ -37,9 +37,6 @@ const Constructors = ({ predictions, currentStandings }) => {
                 {constructor.constructor} - {constructor.points} points
               </li>
             ))}
-            <li key="10" className="pt-3 ml-[-1.75rem] before:content-['10.'] before:mr-1 list-none">
-              {lastConstructor} - {currentStandings[currentStandings.length - 1]?.points} points
-            </li>
           </ol>
         </div>
       </div>
