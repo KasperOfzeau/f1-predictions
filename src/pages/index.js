@@ -2,7 +2,6 @@ import { query } from '../../lib/db';
 import path from 'path';
 import { promises as fs } from 'fs';
 import { fetchCurrentStandings, fetchCurrentDriverStandings } from '../../lib/fetchData';
-import { comparePredictions, calculateTotalScore } from '../../lib/utils';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Constructors from '../components/Constructors';
@@ -11,9 +10,10 @@ import Poles from '../components/Poles';
 import SafetyCars from '../components/SafetyCars';
 import TotalScore from '../components/TotalScore';
 import DNFs from '../components/DNFs';
+import { calculateTotalScores } from '../../lib/score';
 import { compareGrid2025Predictions } from '../../lib/grid2025Utils';
 
-export default function Home({ predictions, currentConstructorStandings, currentDriverStandings, grid2025Scores, currentMostDNF, currentLeastDNF }) {
+export default function Home({ predictions, currentConstructorStandings, currentDriverStandings, grid2025Scores, currentMostDNF, currentLeastDNF, totalScore }) {
   const safetyCarsDifferenceMattijn = Math.abs(predictions.safetyCar.safetyCars.Mattijn - predictions.safetyCar.safetyCars.Current);
   const safetyCarsDifferenceKasper = Math.abs(predictions.safetyCar.safetyCars.Kasper - predictions.safetyCar.safetyCars.Current);
   const safetyCarsClosest = safetyCarsDifferenceMattijn < safetyCarsDifferenceKasper ? 'Mattijn' : 'Kasper';
@@ -21,8 +21,6 @@ export default function Home({ predictions, currentConstructorStandings, current
   const polesDifferenceMattijn = Math.abs(predictions.poles.polesMax.Mattijn - predictions.poles.polesMax.Current);
   const polesDifferenceKasper = Math.abs(predictions.poles.polesMax.Kasper - predictions.poles.polesMax.Current);
   const polesClosest = polesDifferenceMattijn < polesDifferenceKasper ? 'Mattijn' : 'Kasper';
-
-  const totalScore = calculateTotalScore(predictions, currentConstructorStandings, currentDriverStandings, polesClosest, safetyCarsClosest, grid2025Scores, currentMostDNF, currentLeastDNF);
 
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col">
@@ -91,6 +89,17 @@ export async function getServerSideProps() {
   // Calculate the 2025 grid scores
   const grid2025Scores = compareGrid2025Predictions(grid2025Predictions, actualGrid);
 
+  // Calculate total score
+  const safetyCarsDifferenceMattijn = Math.abs(predictions.safetyCar.safetyCars.Mattijn - predictions.safetyCar.safetyCars.Current);
+  const safetyCarsDifferenceKasper = Math.abs(predictions.safetyCar.safetyCars.Kasper - predictions.safetyCar.safetyCars.Current);
+  const safetyCarsClosest = safetyCarsDifferenceMattijn < safetyCarsDifferenceKasper ? 'Mattijn' : 'Kasper';
+
+  const polesDifferenceMattijn = Math.abs(predictions.poles.polesMax.Mattijn - predictions.poles.polesMax.Current);
+  const polesDifferenceKasper = Math.abs(predictions.poles.polesMax.Kasper - predictions.poles.polesMax.Current);
+  const polesClosest = polesDifferenceMattijn < polesDifferenceKasper ? 'Mattijn' : 'Kasper';
+
+  const totalScore = calculateTotalScores(predictions, currentConstructorStandings, currentDriverStandings, polesClosest, safetyCarsClosest, grid2025Scores, currentValues.dnfs.mostDnfs, currentValues.dnfs.leastDnfs);
+
   return {
     props: {
       predictions,
@@ -99,6 +108,7 @@ export async function getServerSideProps() {
       grid2025Scores,
       currentMostDNF: currentValues.dnfs.mostDnfs,
       currentLeastDNF: currentValues.dnfs.leastDnfs,
+      totalScore
     },
   };
 }
