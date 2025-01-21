@@ -1,19 +1,15 @@
 # F1 Predictions
 
 ## Overzicht
-Dit project bevat een frontend gebouwd met **Next.js** en **Tailwind CSS** en een backend gebouwd met **Nest.js**. Het dient als een basisopstelling voor full-stack ontwikkeling en bevat een eenvoudige test om de communicatie tussen frontend en backend te valideren.
-
----
+Dit project bevat een frontend gebouwd met **Next.js** en **Tailwind CSS** en een backend gebouwd met **Nest.js**.
 
 ## Installaties
 ### Frontend
-- **Framework**: [Next.js](https://nextjs.org/) (React-based)
+- **Framework**: [Next.js](https://nextjs.org/) 
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 
 ### Backend
-- **Framework**: [Nest.js](https://nestjs.com/) (Node.js-based)
-
----
+- **Framework**: [Nest.js](https://nestjs.com/)
 
 ## Hoe te runnen
 
