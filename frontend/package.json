@@ -7,6 +7,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "lucide-react": "^0.474.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
