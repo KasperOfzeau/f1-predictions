@@ -22,7 +22,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardNav username={profile?.username} />
+      <DashboardNav username={profile?.username} avatarUrl={profile?.avatar_url} fullName={profile?.full_name} />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
