@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '../../components/LogoutButton'
 import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
-import { getNextRace } from '@/lib/services/races'
+import { getNextEvent } from '@/lib/services/meetings'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -60,8 +60,8 @@ export default async function DashboardPage() {
     })
   )
 
-  // Get next race
-  const nextRace = await getNextRace()
+  // Get next event (race or sprint)
+  const nextEvent = await getNextEvent()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,8 +95,8 @@ export default async function DashboardPage() {
                 </div>
               </div>
 
-              {/* Next Race Card */}
-              {nextRace && <NextRaceCard race={nextRace} />}
+              {/* Next Event Card */}
+              {nextEvent && <NextRaceCard nextEvent={nextEvent} />}
             </div>
 
             {/* Right Column - Pools */}
