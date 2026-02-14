@@ -98,3 +98,33 @@ export interface PredictionAvailability {
   canPredict: boolean
   reason?: string
 }
+
+export interface Driver {
+  driver_number: number
+  broadcast_name: string
+  full_name: string
+  name_acronym: string
+  team_name: string
+  team_colour: string
+  headshot_url: string | null
+  session_key: number
+  meeting_key: number
+}
+
+export interface Prediction {
+  id: string
+  user_id: string
+  race_id: string
+  position_1: number
+  position_2: number
+  position_3: number
+  position_4: number
+  position_5: number
+  position_6: number
+  position_7: number
+  position_8: number
+  position_9: number
+  position_10: number
+  created_at: string
+  updated_at: string
+}

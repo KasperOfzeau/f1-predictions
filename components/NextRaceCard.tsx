@@ -1,12 +1,18 @@
+'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
 import type { NextEvent, PredictionAvailability } from '@/lib/types'
+import PredictionModal from './PredictionModal'
 
 interface NextRaceCardProps {
   nextEvent: NextEvent
   predictionAvailability: PredictionAvailability
+  hasPrediction: boolean
 }
 
-export default function NextRaceCard({ nextEvent, predictionAvailability }: NextRaceCardProps) {
+export default function NextRaceCard({ nextEvent, predictionAvailability, hasPrediction }: NextRaceCardProps) {
+  const [showModal, setShowModal] = useState(false)
   const { session, meeting } = nextEvent
   const sessionDate = new Date(session.date_start)
   const now = new Date()
@@ -82,6 +88,7 @@ export default function NextRaceCard({ nextEvent, predictionAvailability }: Next
         </div>
 
         <button
+          onClick={() => predictionAvailability.canPredict && setShowModal(true)}
           disabled={!predictionAvailability.canPredict}
           className={`w-full mt-4 px-4 py-2 rounded-md font-medium transition-colors ${
             predictionAvailability.canPredict
@@ -90,10 +97,18 @@ export default function NextRaceCard({ nextEvent, predictionAvailability }: Next
           }`}
         >
           {predictionAvailability.canPredict
-            ? 'Make prediction'
+            ? (hasPrediction ? 'Edit prediction' : 'Make prediction')
             : predictionAvailability.reason || 'Predictions not available'}
         </button>
       </div>
+
+      {/* Prediction Modal */}
+      <PredictionModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        session={session}
+        meeting={meeting}
+      />
     </div>
   )
 }

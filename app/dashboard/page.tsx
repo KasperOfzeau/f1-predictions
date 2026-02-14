@@ -68,6 +68,19 @@ export default async function DashboardPage() {
     ? await canMakePrediction(nextEvent.session, nextEvent.meeting.meeting_key)
     : { canPredict: false, reason: 'No upcoming race' }
 
+  // Check if user already has a prediction for this race
+  let existingPrediction = null
+  if (nextEvent) {
+    const { data } = await supabase
+      .from('predictions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('race_id', nextEvent.meeting.id)
+      .single()
+
+    existingPrediction = data
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
@@ -101,7 +114,13 @@ export default async function DashboardPage() {
               </div>
 
               {/* Next Event Card */}
-              {nextEvent && <NextRaceCard nextEvent={nextEvent} predictionAvailability={predictionAvailability} />}
+              {nextEvent && (
+                <NextRaceCard
+                  nextEvent={nextEvent}
+                  predictionAvailability={predictionAvailability}
+                  hasPrediction={!!existingPrediction}
+                />
+              )}
             </div>
 
             {/* Right Column - Pools */}
