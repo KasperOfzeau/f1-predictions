@@ -31,7 +31,7 @@ export default async function SettingsPage() {
       <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6 text-black">Account Settings</h2>
+            <h2 className="text-2xl font-bold mb-6 text-black">Account settings</h2>
             <SettingsForm user={user} profile={profile} />
           </div>
         </div>

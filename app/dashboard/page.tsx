@@ -88,13 +88,13 @@ export default async function DashboardPage() {
           {/* My Pools Section */}
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-black">My Pools</h3>
+              <h3 className="text-xl font-bold text-black">My pools</h3>
               {poolsWithMemberCount && poolsWithMemberCount.length > 0 && (
                 <Link
                   href="/pools/create"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                 >
-                  Create Pool
+                  Create pool
                 </Link>
               )}
             </div>
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                   href="/pools/create"
                   className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium"
                 >
-                  Create Your First Pool
+                  Create your first pool
                 </Link>
               </div>
             ) : (
