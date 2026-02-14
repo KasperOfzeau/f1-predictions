@@ -57,7 +57,7 @@ export default function NextRaceCard({ race }: NextRaceCardProps) {
               </div>
             )}
             <div>
-              <p className="font-semibold text-gray-900">{race.location}</p>
+              <p className="font-semibold text-gray-900">{race.country_name}</p>
               <p className="text-sm text-gray-600">{race.circuit_short_name}</p>
             </div>
           </div>
