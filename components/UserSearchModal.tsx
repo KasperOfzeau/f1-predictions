@@ -35,7 +35,7 @@ export default function UserSearchModal({
 
       const { data } = await supabase
         .from('profiles')
-        .select('id, username, full_name, email')
+        .select('id, username, full_name, email, avatar_url')
         .or(`username.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`)
         .limit(10)
 

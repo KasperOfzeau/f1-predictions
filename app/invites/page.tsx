@@ -54,6 +54,18 @@ export default async function InvitesPage() {
   console.log('Invites:', invites)
   console.log('Invites Error:', invitesError)
 
+  // Normalize: Supabase returns nested relations as arrays; InvitesList expects single objects
+  const normalizedInvites = invites?.map((inv) => ({
+    id: inv.id,
+    pool_id: inv.pool_id,
+    from_user_id: inv.from_user_id,
+    to_user_id: inv.to_user_id,
+    status: inv.status,
+    created_at: inv.created_at,
+    pools: Array.isArray(inv.pools) ? inv.pools[0] : inv.pools,
+    from_profile: Array.isArray(inv.from_profile) ? inv.from_profile[0] : inv.from_profile,
+  })).filter((inv) => inv.pools != null && inv.from_profile != null) ?? []
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
@@ -77,7 +89,7 @@ export default async function InvitesPage() {
               </p>
             </div>
           ) : (
-            <InvitesList invites={invites} />
+            <InvitesList invites={normalizedInvites} />
           )}
         </div>
       </main>

@@ -53,7 +53,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
   }
 
   // Haal members op
-  const { data: members, error: membersError } = await supabase
+  const { data: membersRaw, error: membersError } = await supabase
     .from('pool_members')
     .select(`
       id,
@@ -71,6 +71,17 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     `)
     .eq('pool_id', id)
     .order('points', { ascending: false })
+
+  // Normalize: Supabase returns nested relations as arrays; PoolMembersList expects single object
+  const members = membersRaw?.map((m) => ({
+    id: m.id,
+    pool_id: m.pool_id,
+    user_id: m.user_id,
+    role: m.role,
+    points: m.points,
+    joined_at: m.joined_at,
+    profiles: Array.isArray(m.profiles) ? m.profiles[0] : m.profiles,
+  })).filter((m) => m.profiles != null) ?? []
 
   // Check of huidige user admin is
   const currentMember = members?.find(m => m.user_id === user.id)
