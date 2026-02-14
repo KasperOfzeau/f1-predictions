@@ -188,17 +188,6 @@ export default async function DashboardPage() {
                     ))}
                   </div>
                 )}
-
-                {poolsWithMemberCount && poolsWithMemberCount.length > 0 && (
-                  <div className="mt-4 text-center">
-                    <Link
-                      href="/pools"
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      View All Pools →
-                    </Link>
-                  </div>
-                )}
               </div>
             </div>
           </div>
