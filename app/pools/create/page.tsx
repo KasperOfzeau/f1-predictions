@@ -1,23 +1,25 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import SettingsForm from '@/components/SettingsForm'
+import CreatePoolForm from '@/components/CreatePoolForm'
 import Nav from '@/components/Nav'
+import Link from 'next/link'
 
-export default async function SettingsPage() {
+export default async function CreatePoolPage() {
   const supabase = await createClient()
-
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
     redirect('/login')
   }
 
-  // Fetch profile
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()
+    if (error || !profile) {
+      redirect('/login')
+    }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,8 +28,8 @@ export default async function SettingsPage() {
       <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6 text-black">Account Settings</h2>
-            <SettingsForm user={user} profile={profile} />
+            <h2 className="text-2xl font-bold mb-6">Create New Pool</h2>
+            <CreatePoolForm />
           </div>
         </div>
       </main>
