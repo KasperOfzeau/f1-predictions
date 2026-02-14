@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
@@ -5,6 +6,21 @@ import InviteUserButton from '@/components/InviteUserButton'
 import PoolMembersList from '@/components/PoolMembersList'
 import DeletePoolButton from '@/components/DeletePoolButton'
 import Nav from '@/components/Nav'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+
+  const { data: pool } = await supabase
+    .from('pools')
+    .select('name')
+    .eq('id', id)
+    .single()
+
+  return {
+    title: pool?.name || 'Pool Details',
+  }
+}
 
 export default async function PoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

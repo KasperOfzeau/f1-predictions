@@ -1,7 +1,12 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Nav from '@/components/Nav'
 import InvitesList from '@/components/InvitesList'
+
+export const metadata: Metadata = {
+  title: "Pool Invitations",
+}
 
 export default async function InvitesPage() {
   const supabase = await createClient()

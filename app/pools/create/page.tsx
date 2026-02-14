@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CreatePoolForm from '@/components/CreatePoolForm'
 import Nav from '@/components/Nav'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: "Create Pool",
+}
 
 export default async function CreatePoolPage() {
   const supabase = await createClient()
