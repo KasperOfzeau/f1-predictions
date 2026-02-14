@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import type { Meeting, Session, NextEvent } from '@/lib/types'
+import type { Meeting, Session, NextEvent, PredictionAvailability } from '@/lib/types'
 
 const F1_API_URL = 'https://api.openf1.org/v1'
 
@@ -150,18 +150,21 @@ async function syncSessionsForMeeting(meetingKey: number): Promise<void> {
 
     const sessions = await sessionsResponse.json()
 
-    // Filter only Race and Sprint sessions
-    const raceSessions = sessions.filter((session: any) =>
-      session.session_name === 'Race' || session.session_name === 'Sprint'
+    // Filter Race, Sprint, Qualifying, and Sprint Qualifying sessions
+    const relevantSessions = sessions.filter((session: any) =>
+      session.session_name === 'Race' ||
+      session.session_name === 'Sprint' ||
+      session.session_name === 'Qualifying' ||
+      session.session_name === 'Sprint Qualifying'
     )
 
-    if (raceSessions.length === 0) {
-      console.log(`No race/sprint sessions found for meeting ${meetingKey}`)
+    if (relevantSessions.length === 0) {
+      console.log(`No race/sprint/qualifying sessions found for meeting ${meetingKey}`)
       return
     }
 
     // Transform and insert sessions
-    const sessionsToInsert = raceSessions.map((session: any) => ({
+    const sessionsToInsert = relevantSessions.map((session: any) => ({
       session_key: session.session_key,
       session_type: session.session_type,
       session_name: session.session_name,
@@ -190,7 +193,7 @@ async function syncSessionsForMeeting(meetingKey: number): Promise<void> {
       throw sessionsError
     }
 
-    console.log(`✓ Synced ${sessionsToInsert.length} race/sprint sessions for meeting ${meetingKey}`)
+    console.log(`✓ Synced ${sessionsToInsert.length} sessions (race/sprint/qualifying) for meeting ${meetingKey}`)
   } catch (error) {
     console.error('Error syncing sessions:', error)
     throw error
@@ -255,7 +258,7 @@ export async function getSessionsForMeeting(meetingKey: number): Promise<Session
     .from('sessions')
     .select('*')
     .eq('meeting_key', meetingKey)
-    .in('session_name', ['Race', 'Sprint'])
+    .in('session_name', ['Race', 'Sprint', 'Qualifying', 'Sprint Qualifying'])
     .order('date_start', { ascending: true })
 
   if (error) {
@@ -264,4 +267,101 @@ export async function getSessionsForMeeting(meetingKey: number): Promise<Session
   }
 
   return sessions || []
+}
+
+/**
+ * Get all qualifying sessions for a specific meeting
+ */
+export async function getQualifyingForMeeting(meetingKey: number): Promise<Session[]> {
+  const supabase = await createClient()
+
+  const { data: sessions, error } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('meeting_key', meetingKey)
+    .in('session_name', ['Qualifying', 'Sprint Qualifying'])
+    .order('date_start', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching qualifying sessions:', error)
+    return []
+  }
+
+  return sessions || []
+}
+
+/**
+ * Check if user can make a prediction for a race/sprint session
+ *
+ * Predictions are only possible when:
+ * 1. The race/sprint itself hasn't happened yet (is in the future)
+ * 2. The qualifying has already happened (is in the past)
+ * 3. The starting grid data is available from the API
+ *
+ * For Race: checks if Qualifying has happened and starting grid is available
+ * For Sprint: checks if Sprint Qualifying has happened and starting grid is available
+ *
+ * Returns an object with canPredict (boolean) and optional reason (string)
+ */
+export async function canMakePrediction(session: Session, meetingKey: number): Promise<PredictionAvailability> {
+  try {
+    const supabase = await createClient()
+    const now = new Date()
+
+    // STEP 1: Check if the race/sprint itself has already happened
+    const raceStart = new Date(session.date_start)
+    if (raceStart <= now) {
+      console.log(`Race/Sprint has already started or finished - predictions not possible`)
+      return { canPredict: false, reason: 'Race has started' }
+    }
+
+    // STEP 2: Determine which qualifying session to look for
+    const qualifyingSessionName = session.session_name === 'Sprint' ? 'Sprint Qualifying' : 'Qualifying'
+
+    // Get the qualifying session for this meeting
+    const { data: qualifyingSession } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('meeting_key', meetingKey)
+      .eq('session_name', qualifyingSessionName)
+      .single()
+
+    if (!qualifyingSession) {
+      console.log(`No ${qualifyingSessionName} session found for meeting ${meetingKey}`)
+      return { canPredict: false, reason: 'Qualifying session not found' }
+    }
+
+    // STEP 3: Check if qualifying has already happened
+    const qualifyingEnd = new Date(qualifyingSession.date_end)
+    if (qualifyingEnd > now) {
+      console.log(`${qualifyingSessionName} hasn't happened yet - predictions not possible`)
+      return { canPredict: false, reason: 'Qualifying not yet happened' }
+    }
+
+    // STEP 4: Check if starting grid data is available from API
+    const response = await fetch(
+      `${F1_API_URL}/starting_grid?session_key=${qualifyingSession.session_key}&position<=1`
+    )
+
+    if (!response.ok) {
+      console.error('Failed to fetch starting grid data')
+      return { canPredict: false, reason: 'Grid data not available' }
+    }
+
+    const startingGridData = await response.json()
+
+    // If we have at least one position, the starting grid is available
+    const isAvailable = Array.isArray(startingGridData) && startingGridData.length > 0
+
+    if (isAvailable) {
+      console.log(`✓ Starting grid available - predictions can be made`)
+      return { canPredict: true }
+    } else {
+      console.log(`Starting grid data not yet available from API`)
+      return { canPredict: false, reason: 'Grid data not available' }
+    }
+  } catch (error) {
+    console.error('Error checking prediction availability:', error)
+    return { canPredict: false, reason: 'Error checking availability' }
+  }
 }

@@ -1,11 +1,12 @@
 import Image from 'next/image'
-import type { NextEvent } from '@/lib/types'
+import type { NextEvent, PredictionAvailability } from '@/lib/types'
 
 interface NextRaceCardProps {
   nextEvent: NextEvent
+  predictionAvailability: PredictionAvailability
 }
 
-export default function NextRaceCard({ nextEvent }: NextRaceCardProps) {
+export default function NextRaceCard({ nextEvent, predictionAvailability }: NextRaceCardProps) {
   const { session, meeting } = nextEvent
   const sessionDate = new Date(session.date_start)
   const now = new Date()
@@ -80,9 +81,18 @@ export default function NextRaceCard({ nextEvent }: NextRaceCardProps) {
           </span>
         </div>
 
-        {/* <button className="w-full mt-4 bg-[#ED1131] hover:bg-[#C00E28] text-white px-4 py-2 rounded-md font-medium transition-colors">
-          Make Prediction
-        </button> */}
+        <button
+          disabled={!predictionAvailability.canPredict}
+          className={`w-full mt-4 px-4 py-2 rounded-md font-medium transition-colors ${
+            predictionAvailability.canPredict
+              ? 'bg-[#ED1131] hover:bg-[#C00E28] text-white cursor-pointer'
+              : 'bg-gray-300 text-gray-600 cursor-not-allowed opacity-60'
+          }`}
+        >
+          {predictionAvailability.canPredict
+            ? 'Make prediction'
+            : predictionAvailability.reason || 'Predictions not available'}
+        </button>
       </div>
     </div>
   )

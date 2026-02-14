@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '../../components/LogoutButton'
 import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
-import { getNextEvent } from '@/lib/services/meetings'
+import { getNextEvent, canMakePrediction } from '@/lib/services/meetings'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -63,6 +63,11 @@ export default async function DashboardPage() {
   // Get next event (race or sprint)
   const nextEvent = await getNextEvent()
 
+  // Check if user can make predictions for this race/sprint
+  const predictionAvailability = nextEvent
+    ? await canMakePrediction(nextEvent.session, nextEvent.meeting.meeting_key)
+    : { canPredict: false, reason: 'No upcoming race' }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
@@ -96,7 +101,7 @@ export default async function DashboardPage() {
               </div>
 
               {/* Next Event Card */}
-              {nextEvent && <NextRaceCard nextEvent={nextEvent} />}
+              {nextEvent && <NextRaceCard nextEvent={nextEvent} predictionAvailability={predictionAvailability} />}
             </div>
 
             {/* Right Column - Pools */}

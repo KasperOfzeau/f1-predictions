@@ -93,3 +93,8 @@ export interface NextEvent {
   session: Session
   meeting: Meeting // Changed from Race
 }
+
+export interface PredictionAvailability {
+  canPredict: boolean
+  reason?: string
+}
