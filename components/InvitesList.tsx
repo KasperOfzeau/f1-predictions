@@ -40,7 +40,7 @@ export default function InvitesList({ invites }: InvitesListProps) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Stap 1: Voeg user toe aan pool
+    // Step 1: Add user to pool
     const { error: memberError } = await supabase
       .from('pool_members')
       .insert({
@@ -55,7 +55,7 @@ export default function InvitesList({ invites }: InvitesListProps) {
       return
     }
 
-    // Stap 2: Update invite status
+    // Step 2: Update invite status
     const { error: updateError } = await supabase
       .from('invites')
       .update({ status: 'accepted' })
@@ -68,7 +68,7 @@ export default function InvitesList({ invites }: InvitesListProps) {
       return
     }
 
-    // Redirect naar pool
+    // Redirect to pool
     router.push(`/pools/${invite.pool_id}`)
     router.refresh()
   }

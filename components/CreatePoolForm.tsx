@@ -43,7 +43,7 @@ export default function CreatePoolForm() {
       return
     }
 
-    // Redirect naar pool detail pagina
+    // Redirect to pool detail page
     router.push(`/pools/${pool.id}`)
     router.refresh()
   }

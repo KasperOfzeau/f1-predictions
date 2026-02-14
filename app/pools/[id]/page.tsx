@@ -41,7 +41,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     redirect('/login')
   }
 
-  // Haal pool op
+  // Fetch pool
   const { data: pool, error: poolError } = await supabase
     .from('pools')
     .select('*')
@@ -52,7 +52,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     notFound()
   }
 
-  // Haal members op
+  // Fetch members
   const { data: membersRaw, error: membersError } = await supabase
     .from('pool_members')
     .select(`
@@ -83,7 +83,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     profiles: Array.isArray(m.profiles) ? m.profiles[0] : m.profiles,
   })).filter((m) => m.profiles != null) ?? []
 
-  // Check of huidige user admin is
+  // Check if current user is admin
   const currentMember = members?.find(m => m.user_id === user.id)
   const isAdmin = currentMember?.role === 'admin'
 

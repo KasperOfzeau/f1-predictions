@@ -26,7 +26,7 @@ export default async function NotificationsPage() {
     redirect('/login')
   }
 
-  // Haal alle notificaties op (unread eerst)
+  // Fetch all notifications (unread first)
   const { data: notifications } = await supabase
     .from('notifications')
     .select('*')

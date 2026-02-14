@@ -26,7 +26,7 @@ export default async function InvitesPage() {
     redirect('/login')
   }
 
-  // Haal pending invites op met nested select (nu werkt het!)
+  // Fetch pending invites with nested select
   const { data: invites, error: invitesError } = await supabase
     .from('invites')
     .select(`
