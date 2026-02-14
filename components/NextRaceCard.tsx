@@ -5,10 +5,20 @@ interface NextRaceCardProps {
   race: Race
 }
 
+const tz = 'Europe/Amsterdam'
+const shortDateOpts: Intl.DateTimeFormatOptions = {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  timeZone: tz,
+}
+const withYear: Intl.DateTimeFormatOptions = { ...shortDateOpts, year: 'numeric' }
+
 export default function NextRaceCard({ race }: NextRaceCardProps) {
-  const raceDate = new Date(race.date_start)
+  const raceStartDate = new Date(race.date_start)
+  const raceEndDate = new Date(race.date_end)
   const now = new Date()
-  const daysUntil = Math.ceil((raceDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  const daysUntil = Math.ceil((raceStartDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -26,7 +36,7 @@ export default function NextRaceCard({ race }: NextRaceCardProps) {
         )}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
-            <p className="text-sm font-medium uppercase tracking-wide">Next Race</p>
+            <p className="text-sm font-medium uppercase tracking-wide">Next race weekend</p>
             <h3 className="text-2xl font-bold mt-1">{race.meeting_name}</h3>
           </div>
         </div>
@@ -58,29 +68,11 @@ export default function NextRaceCard({ race }: NextRaceCardProps) {
           </div>
         </div>
 
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Date:</span>
-            <span className="font-medium text-gray-900">
-              {raceDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Time:</span>
-            <span className="font-medium text-gray-900">
-              {raceDate.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                timeZoneName: 'short',
-              })}
-            </span>
-          </div>
-        </div>
+        <p className="text-sm text-gray-600">
+          <span className="font-medium text-gray-900">
+            {raceStartDate.toLocaleDateString('en-GB', shortDateOpts)} – {raceEndDate.toLocaleDateString('en-GB', withYear)}
+          </span>
+        </p>
 
         {/* <button className="w-full mt-4 bg-[#ED1131] hover:bg-[#C00E28] text-white px-4 py-2 rounded-md font-medium transition-colors">
           Make Prediction
