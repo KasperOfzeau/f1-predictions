@@ -4,7 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '../../components/LogoutButton'
 import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
+import GlobalLeaderboard from '../../components/GlobalLeaderboard'
 import { getNextEvent, canMakePrediction } from '@/lib/services/meetings'
+import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -81,6 +83,9 @@ export default async function DashboardPage() {
     existingPrediction = data
   }
 
+  // Get global leaderboard
+  const leaderboard = await getGlobalLeaderboard(5)
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
@@ -103,7 +108,7 @@ export default async function DashboardPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 mt-4">
-                  <Link 
+                  <Link
                     href="/settings"
                     className="text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                   >
@@ -123,17 +128,18 @@ export default async function DashboardPage() {
               )}
             </div>
 
-            {/* Right Column - Pools */}
-            <div className="lg:col-span-2">
+            {/* Right Column - Pools & Leaderboard */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* My Pools */}
               <div className="bg-white shadow rounded-lg p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-black">My Pools</h3>
+                  <h3 className="text-xl font-bold text-black">My pools</h3>
                   {poolsWithMemberCount && poolsWithMemberCount.length > 0 && (
                     <Link
                       href="/pools/create"
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                     >
-                      Create Pool
+                      Create pool
                     </Link>
                   )}
                 </div>
@@ -182,6 +188,12 @@ export default async function DashboardPage() {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Global Leaderboard */}
+              <div className="bg-white shadow rounded-lg p-6">
+                <h3 className="text-xl font-bold text-black mb-6">Global leaderboard</h3>
+                <GlobalLeaderboard entries={leaderboard} />
               </div>
             </div>
           </div>
