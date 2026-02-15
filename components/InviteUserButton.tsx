@@ -88,7 +88,7 @@ export default function InviteUserButton({ poolId }: InviteUserButtonProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+        className="bg-f1-red hover:bg-f1-red-hover text-white px-4 py-2 rounded-md font-medium"
       >
         Invite users
       </button>

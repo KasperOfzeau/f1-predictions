@@ -35,7 +35,7 @@ export default async function NotificationsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-carbon-black">
       <Nav />
 
       <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">

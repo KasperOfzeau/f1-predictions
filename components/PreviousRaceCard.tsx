@@ -90,7 +90,7 @@ export default function PreviousRaceCard({ lastEvent, hasPrediction, points, pre
             </p><button
               type="button"
               onClick={() => setShowResultModal(true)}
-              className="w-full mt-4 px-4 py-2 rounded-md font-medium bg-[#ED1131] hover:bg-[#C00E28] text-white cursor-pointer transition-colors"
+              className="w-full mt-4 px-4 py-2 rounded-md font-medium bg-f1-red hover:bg-f1-red-hover text-white cursor-pointer transition-colors"
             >
                 View prediction result
               </button></>

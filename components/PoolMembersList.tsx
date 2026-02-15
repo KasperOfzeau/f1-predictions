@@ -108,7 +108,7 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
                       @{member.profiles.username}
                     </p>
                     {member.role === 'admin' && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-red-100 text-f1-red px-2 py-1 rounded">
                         Admin
                       </span>
                     )}

@@ -1,12 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background & text */
+  --background: #15151E;
+  --foreground: #f4f4f5;
+  --foreground-muted: #a1a1aa;
+
+  --f1-red: #FF1801;
+  --f1-red-hover: #cc1402;
+  --carbon-black: #15151E;
+  --black: #000000;
 }
 
+/* Tailwind v4 theme – available as e.g. bg-f1-red, text-f1-red, bg-carbon-black */
+@theme {
+  --color-f1-red: #FF1801;
+  --color-f1-red-hover: #cc1402;
+  --color-carbon-black: #15151E;
+  --color-f1-black: #000000;
+  /* Override any Tailwind/default --background */
+  --background: #15151E;
+  --foreground: #f4f4f5;
+}
 
 body {
-  background: var(--background);
+  background: #15151E;
   font-family: Arial, Helvetica, sans-serif;
 }

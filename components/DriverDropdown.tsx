@@ -47,7 +47,7 @@ export default function DriverDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-left focus:ring-2 focus:ring-[#ED1131] focus:border-transparent flex items-center gap-2"
+        className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-left focus:ring-2 focus:ring-f1-red focus:border-transparent flex items-center gap-2"
       >
         {selectedDriver ? (
           <>
@@ -124,7 +124,7 @@ export default function DriverDropdown({
                   disabled
                     ? 'opacity-50 cursor-not-allowed bg-gray-50'
                     : 'hover:bg-gray-100 cursor-pointer'
-                } ${selectedDriverId === driver.driver_number ? 'bg-blue-50' : ''}`}
+                } ${selectedDriverId === driver.driver_number ? 'bg-red-50' : ''}`}
               >
                 {/* Driver Avatar */}
                 <div className="w-8 h-8 relative rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
@@ -159,7 +159,7 @@ export default function DriverDropdown({
 
                 {/* Selected Checkmark */}
                 {selectedDriverId === driver.driver_number && (
-                  <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-f1-red" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"

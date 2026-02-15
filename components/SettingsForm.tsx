@@ -203,7 +203,7 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
               type="button"
               disabled={uploadingAvatar}
               onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-600 hover:border-blue-700 rounded-md disabled:opacity-50"
+              className="px-3 py-1.5 text-sm font-medium text-f1-red hover:text-f1-red-hover border border-f1-red hover:border-f1-red-hover rounded-md disabled:opacity-50"
             >
               {uploadingAvatar ? 'Uploading...' : 'Upload photo'}
             </button>
@@ -240,7 +240,7 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
           required
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-f1-red focus:border-f1-red"
           placeholder="Your full name"
         />
       </div>
@@ -256,7 +256,7 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
           value={username}
           onChange={(e) => setUsername(e.target.value.toLowerCase())}
           pattern="[a-zA-Z0-9_]{3,20}"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-f1-red focus:border-f1-red"
           placeholder="your_username"
         />
         <p className="mt-1 text-xs text-gray-500">
@@ -268,7 +268,7 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-f1-red hover:bg-f1-red-hover text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Saving...' : 'Save changes'}
         </button>

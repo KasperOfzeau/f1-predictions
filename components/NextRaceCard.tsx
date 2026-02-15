@@ -25,7 +25,7 @@ export default function NextRaceCard({ nextEvent, predictionAvailability, hasPre
 
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
-      <div className="relative h-48 bg-gradient-to-br from-[#ED1131] to-[#C00E28]">
+      <div className="relative h-48 bg-gradient-to-br from-f1-red to-f1-red-hover">
         {meeting.circuit_image && (
           <div className="absolute inset-0 opacity-30">
             <Image
@@ -68,7 +68,7 @@ export default function NextRaceCard({ nextEvent, predictionAvailability, hasPre
           </div>
 
           <div className="text-right">
-            <p className="text-2xl font-bold text-[#ED1131]">{daysUntil}</p>
+            <p className="text-2xl font-bold text-f1-red">{daysUntil}</p>
             <p className="text-xs text-gray-600">days to go</p>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function NextRaceCard({ nextEvent, predictionAvailability, hasPre
           disabled={!predictionAvailability.canPredict}
           className={`w-full mt-4 px-4 py-2 rounded-md font-medium transition-colors ${
             predictionAvailability.canPredict
-              ? 'bg-[#ED1131] hover:bg-[#C00E28] text-white cursor-pointer'
+              ? 'bg-f1-red hover:bg-f1-red-hover text-white cursor-pointer'
               : 'bg-gray-300 text-gray-600 cursor-not-allowed opacity-60'
           }`}
         >

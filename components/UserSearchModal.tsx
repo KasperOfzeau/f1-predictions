@@ -102,7 +102,7 @@ export default function UserSearchModal({
               <button
                 onClick={() => onInvite(user.id)}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm disabled:opacity-50"
+                className="bg-f1-red hover:bg-f1-red-hover text-white px-4 py-1 rounded text-sm disabled:opacity-50"
               >
                 {loading ? 'Sending...' : 'Invite'}
               </button>

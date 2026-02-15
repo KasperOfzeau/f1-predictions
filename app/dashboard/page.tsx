@@ -104,7 +104,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-carbon-black">
       <Nav />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -114,7 +114,7 @@ export default async function DashboardPage() {
             <div className="lg:col-span-1 space-y-6">
               {/* Profile Card */}
               <div className="bg-white shadow rounded-lg p-6">
-                <h2 className="text-2xl font-bold mb-4 text-black">
+                <h2 className="text-2xl font-bold mb-4 text-carbon-black">
                   Welcome, {profile?.username || 'User'}!
                 </h2>
                 <div className="space-y-2 text-gray-600 text-sm">
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
                 <div className="flex flex-col gap-2 mt-4">
                   <Link
                     href="/settings"
-                    className="text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    className="text-center bg-f1-red hover:bg-f1-red-hover text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                   >
                     Edit Profile
                   </Link>
@@ -160,11 +160,11 @@ export default async function DashboardPage() {
               {/* My Pools */}
               <div className="bg-white shadow rounded-lg p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-black">My pools</h3>
+                  <h3 className="text-xl font-bold text-carbon-black">My pools</h3>
                   {poolsWithMemberCount && poolsWithMemberCount.length > 0 && (
                     <Link
                       href="/pools/create"
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                      className="bg-f1-red hover:bg-f1-red-hover text-white px-4 py-2 rounded-md text-sm font-medium"
                     >
                       Create pool
                     </Link>
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
                     <p className="text-gray-600 mb-4">You're not in any pools yet</p>
                     <Link
                       href="/pools/create"
-                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium"
+                      className="inline-block bg-f1-red hover:bg-f1-red-hover text-white px-6 py-2 rounded-md font-medium"
                     >
                       Create your first pool
                     </Link>
@@ -187,14 +187,14 @@ export default async function DashboardPage() {
                       <Link
                         key={membership.id}
                         href={`/pools/${membership.pools.id}`}
-                        className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all"
+                        className="border border-gray-200 rounded-lg p-4 hover:border-f1-red hover:shadow-md transition-all"
                       >
                         <div className="flex justify-between items-start mb-2">
-                          <h4 className="text-lg font-semibold text-black">
+                          <h4 className="text-lg font-semibold text-carbon-black">
                             {membership.pools.name}
                           </h4>
                           {membership.role === 'admin' && (
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            <span className="text-xs bg-red-100 text-f1-red px-2 py-1 rounded">
                               Admin
                             </span>
                           )}
@@ -219,7 +219,7 @@ export default async function DashboardPage() {
 
               {/* Global Leaderboard */}
               <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-xl font-bold text-black mb-6">Global leaderboard ({ new Date().getFullYear() })</h3>
+                <h3 className="text-xl font-bold text-carbon-black mb-6">Global leaderboard ({ new Date().getFullYear() })</h3>
                 <GlobalLeaderboard entries={leaderboard} />
               </div>
             </div>

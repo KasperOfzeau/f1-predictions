@@ -176,7 +176,7 @@ export default function PredictionModal({ isOpen, onClose, onPredictionSaved, se
           {/* Loading State */}
           {loading && (
             <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ED1131]"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-f1-red"></div>
             </div>
           )}
 
@@ -216,7 +216,7 @@ export default function PredictionModal({ isOpen, onClose, onPredictionSaved, se
               <button
                 onClick={handleSubmit}
                 disabled={!isValid() || saving}
-                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-4 py-2 bg-f1-red hover:bg-f1-red-hover text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? 'Saving...' : 'Submit Prediction'}
               </button>

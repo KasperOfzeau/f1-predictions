@@ -18,26 +18,26 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-carbon-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
         <div className="text-center">
-          <h1 className="text-5xl font-extrabold text-[#ED1131] mb-4">
+          <h1 className="text-5xl font-extrabold text-f1-red mb-4">
             F1 Predictions
           </h1>
-          <p className="text-xl text-gray-900 mb-8">
+          <p className="text-xl text-zinc-200 mb-8">
             Predict race results and compete with your friends!
           </p>
           
           <div className="flex gap-4 justify-center">
             <Link
               href="/register"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold"
+              className="bg-f1-red hover:bg-f1-red-hover text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors"
             >
               Register
             </Link>
             <Link
               href="/login"
-              className="bg-white hover:bg-gray-50 text-blue-600 border-2 border-blue-600 px-8 py-3 rounded-lg text-lg font-semibold"
+              className="bg-carbon-black hover:bg-f1-black text-white border-2 border-f1-red px-8 py-3 rounded-lg text-lg font-semibold transition-colors"
             >
               Login
             </Link>

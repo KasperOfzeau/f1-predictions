@@ -67,13 +67,13 @@ export default function NotificationsList({ notifications }: NotificationsListPr
   return (
     <div className="space-y-4">
       {unreadCount > 0 && (
-        <div className="flex justify-between items-center bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
+        <div className="flex justify-between items-center bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-sm text-red-800">
             You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
           </p>
           <button
             onClick={handleMarkAllAsRead}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-f1-red hover:text-f1-red-hover font-medium"
           >
             Mark all as read
           </button>
@@ -84,7 +84,7 @@ export default function NotificationsList({ notifications }: NotificationsListPr
         <div
           key={notification.id}
           className={`bg-white shadow rounded-lg p-5 hover:shadow-md transition-shadow ${
-            !notification.read ? 'border-l-4 border-blue-500' : ''
+            !notification.read ? 'border-l-4 border-f1-red' : ''
           }`}
         >
           <div className="flex items-start gap-4">
@@ -124,7 +124,7 @@ export default function NotificationsList({ notifications }: NotificationsListPr
                   <Link
                     href={notification.link}
                     onClick={() => handleMarkAsRead(notification.id)}
-                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+                    className="text-sm bg-f1-red hover:bg-f1-red-hover text-white px-4 py-2 rounded-md font-medium"
                   >
                     View
                   </Link>
