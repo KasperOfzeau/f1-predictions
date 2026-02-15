@@ -6,6 +6,7 @@ import InviteUserButton from '@/components/InviteUserButton'
 import PoolMembersList from '@/components/PoolMembersList'
 import DeletePoolButton from '@/components/DeletePoolButton'
 import Nav from '@/components/Nav'
+import { getOrComputeSeasonPointsForUsers } from '@/lib/services/seasonScores'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -60,7 +61,6 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
       pool_id,
       user_id,
       role,
-      points,
       joined_at,
       profiles (
         id,
@@ -70,7 +70,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
       )
     `)
     .eq('pool_id', id)
-    .order('points', { ascending: false })
+    .order('joined_at', { ascending: true })
 
   // Normalize: Supabase returns nested relations as arrays; PoolMembersList expects single object
   const members = membersRaw?.map((m) => ({
@@ -78,7 +78,6 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
     pool_id: m.pool_id,
     user_id: m.user_id,
     role: m.role,
-    points: m.points,
     joined_at: m.joined_at,
     profiles: Array.isArray(m.profiles) ? m.profiles[0] : m.profiles,
   })).filter((m) => m.profiles != null) ?? []
@@ -86,6 +85,17 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
   // Check if current user is admin
   const currentMember = members?.find(m => m.user_id === user.id)
   const isAdmin = currentMember?.role === 'admin'
+
+  const seasonYear = new Date().getFullYear()
+  const seasonPointsByUser = members.length > 0
+    ? await getOrComputeSeasonPointsForUsers(members.map((m) => m.user_id), seasonYear)
+    : {}
+
+  const membersSortedByScore = [...members].sort((a, b) => {
+    const ptsA = seasonPointsByUser[a.user_id] ?? 0
+    const ptsB = seasonPointsByUser[b.user_id] ?? 0
+    return ptsB - ptsA
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,10 +144,11 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
               Members ({members?.length || 0})
             </h2>
             <PoolMembersList
-              members={members || []}
+              members={membersSortedByScore}
               isAdmin={isAdmin}
               poolId={pool.id}
               currentUserId={user.id}
+              seasonPointsByUser={seasonPointsByUser}
             />
           </div>
         </div>

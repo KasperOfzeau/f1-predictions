@@ -1,31 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import type { NextEvent, PredictionAvailability } from '@/lib/types'
-import PredictionModal from './PredictionModal'
+import type { NextEvent, Prediction } from '@/lib/types'
+import PreviousRaceResultModal from './PreviousRaceResultModal'
 
-interface NextRaceCardProps {
-  nextEvent: NextEvent
-  predictionAvailability: PredictionAvailability
+interface PreviousRaceCardProps {
+  lastEvent: NextEvent
   hasPrediction: boolean
+  points: number | null
+  prediction: Prediction | null
 }
 
-export default function NextRaceCard({ nextEvent, predictionAvailability, hasPrediction }: NextRaceCardProps) {
-  const router = useRouter()
-  const [showModal, setShowModal] = useState(false)
-  const { session, meeting } = nextEvent
+export default function PreviousRaceCard({ lastEvent, hasPrediction, points, prediction }: PreviousRaceCardProps) {
+  const [showResultModal, setShowResultModal] = useState(false)
+  const { session, meeting } = lastEvent
   const sessionDate = new Date(session.date_start)
-  const now = new Date()
-  const daysUntil = Math.ceil((sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-
-  // Determine if it's a sprint weekend
   const isSprint = session.session_name === 'Sprint'
 
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
-      <div className="relative h-48 bg-gradient-to-br from-[#ED1131] to-[#C00E28]">
+      <div className="relative h-48 bg-gradient-to-br from-gray-700 to-gray-800">
         {meeting.circuit_image && (
           <div className="absolute inset-0 opacity-30">
             <Image
@@ -40,7 +35,7 @@ export default function NextRaceCard({ nextEvent, predictionAvailability, hasPre
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white">
             <p className="text-sm font-medium uppercase tracking-wide">
-              {isSprint ? 'Next sprint race' : 'Next race'}
+              {isSprint ? 'Last sprint race' : 'Last race'}
             </p>
             <h3 className="text-2xl font-bold mt-1">{meeting.meeting_name}</h3>
           </div>
@@ -66,11 +61,6 @@ export default function NextRaceCard({ nextEvent, predictionAvailability, hasPre
               <p className="text-sm text-gray-600">{meeting.circuit_short_name}</p>
             </div>
           </div>
-
-          <div className="text-right">
-            <p className="text-2xl font-bold text-[#ED1131]">{daysUntil}</p>
-            <p className="text-xs text-gray-600">days to go</p>
-          </div>
         </div>
 
         <div className="text-sm">
@@ -90,28 +80,40 @@ export default function NextRaceCard({ nextEvent, predictionAvailability, hasPre
           </span>
         </div>
 
-        <button
-          onClick={() => predictionAvailability.canPredict && setShowModal(true)}
-          disabled={!predictionAvailability.canPredict}
-          className={`w-full mt-4 px-4 py-2 rounded-md font-medium transition-colors ${
-            predictionAvailability.canPredict
-              ? 'bg-[#ED1131] hover:bg-[#C00E28] text-white cursor-pointer'
-              : 'bg-gray-300 text-gray-600 cursor-not-allowed opacity-60'
-          }`}
-        >
-          {predictionAvailability.canPredict
-            ? (hasPrediction ? 'Edit prediction' : 'Make prediction')
-            : predictionAvailability.reason || 'Predictions not available'}
-        </button>
+        <div className="space-y-2 pt-2">
+          {hasPrediction && (
+            <><p className="text-sm text-gray-600">
+              Points earned:{' '}
+              <span className="font-bold text-gray-900">
+                {points !== null ? points : '—'}
+              </span>
+            </p><button
+              type="button"
+              onClick={() => setShowResultModal(true)}
+              className="w-full mt-4 px-4 py-2 rounded-md font-medium bg-[#ED1131] hover:bg-[#C00E28] text-white cursor-pointer transition-colors"
+            >
+                View prediction result
+              </button></>
+          )}
+          {!hasPrediction && (
+            <button 
+              type="button"
+              disabled={true}
+              className="w-full mt-4 px-4 py-2 rounded-md font-medium bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 transition-colors"
+            >
+              No prediction made
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Prediction Modal */}
-      <PredictionModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onPredictionSaved={() => router.refresh()}
-        session={session}
-        meeting={meeting}
+      <PreviousRaceResultModal
+        isOpen={showResultModal}
+        onClose={() => setShowResultModal(false)}
+        sessionKey={session.session_key}
+        meetingName={meeting.meeting_name}
+        prediction={prediction}
+        points={points}
       />
     </div>
   )

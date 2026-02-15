@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Meeting, NextEvent, PredictionAvailability, Session } from '@/lib/types'
 import {
   ensureSessionsSyncedForMeeting,
+  getLastRaceOrSprintForMeeting,
   getNextRaceOrSprintForMeeting,
   syncSessionsForMeeting,
 } from '@/lib/services/sessions'
@@ -37,6 +38,37 @@ export async function getNextEvent(): Promise<NextEvent | null> {
   if (!nextSession) return null
 
   return { session: nextSession, meeting: nextMeeting }
+}
+
+/**
+ * Get the last finished race or sprint event (for "previous race" card).
+ * Looks in current year first, then previous year (e.g. at start of new season).
+ */
+export async function getLastEvent(): Promise<NextEvent | null> {
+  const supabase = await createClient()
+  const currentYear = new Date().getFullYear()
+  const now = new Date().toISOString()
+
+  await ensureMeetingsSynced(supabase, currentYear)
+
+  let lastMeeting = await getLastFinishedMeeting(supabase, currentYear, now)
+  if (!lastMeeting) {
+    const previousYear = currentYear - 1
+    await ensureMeetingsSynced(supabase, previousYear)
+    lastMeeting = await getLastFinishedMeeting(supabase, previousYear, now)
+  }
+  if (!lastMeeting) return null
+
+  await ensureSessionsSyncedForMeeting(supabase, lastMeeting.meeting_key)
+
+  const lastSession = await getLastRaceOrSprintForMeeting(
+    supabase,
+    lastMeeting.meeting_key,
+    now
+  )
+  if (!lastSession) return null
+
+  return { session: lastSession, meeting: lastMeeting }
 }
 
 export async function getAllMeetings(year: number): Promise<Meeting[]> {
@@ -166,6 +198,23 @@ async function getNextUpcomingMeeting(
 
   if (!data) console.log('No upcoming meetings found')
   return data
+}
+
+async function getLastFinishedMeeting(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  year: number,
+  now: string
+) {
+  const { data } = await supabase
+    .from('meetings')
+    .select('*')
+    .eq('year', year)
+    .lt('date_end', now)
+    .order('date_end', { ascending: false })
+    .limit(1)
+    .single()
+
+  return data ?? null
 }
 
 // -----------------------------------------------------------------------------

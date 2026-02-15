@@ -89,6 +89,28 @@ export async function getNextRaceOrSprintForMeeting(
   return data
 }
 
+/**
+ * Get the most recent finished Race or Sprint session for a meeting.
+ */
+export async function getLastRaceOrSprintForMeeting(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  meetingKey: number,
+  now: string
+): Promise<Session | null> {
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('meeting_key', meetingKey)
+    .in('session_name', [...RACE_OR_SPRINT_NAMES])
+    .lt('date_end', now)
+    .order('date_end', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (error || !data) return null
+  return data
+}
+
 // -----------------------------------------------------------------------------
 // Sync: OpenF1 API → DB
 // -----------------------------------------------------------------------------

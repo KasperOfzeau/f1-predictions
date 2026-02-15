@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getOrComputeSeasonPointsForUsers } from '@/lib/services/seasonScores'
 
 export interface LeaderboardEntry {
   user_id: string
@@ -8,34 +9,42 @@ export interface LeaderboardEntry {
   rank: number
 }
 
+const CURRENT_YEAR = new Date().getFullYear()
+
 /**
- * Get global leaderboard - top players across all pools
+ * Get global leaderboard - top players by season score (current year).
  * @param limit - Number of top players to return (default 5)
  */
 export async function getGlobalLeaderboard(limit: number = 5): Promise<LeaderboardEntry[]> {
   const supabase = await createClient()
 
-  // Fetch all profiles
   const { data: profiles, error } = await supabase
     .from('profiles')
     .select('id, username, avatar_url')
     .not('username', 'is', null)
-    .order('username', { ascending: true })
-    .limit(limit)
+    .limit(200)
 
-  if (error) {
-    console.error('Error fetching leaderboard:', error)
+  if (error || !profiles?.length) {
+    if (error) console.error('Error fetching leaderboard:', error)
     return []
   }
 
-  // Map to leaderboard entries with hardcoded 0 points for now
-  const leaderboard: LeaderboardEntry[] = (profiles || []).map((profile, index) => ({
+  const userIds = profiles.map((p) => p.id)
+  const seasonPointsByUser = await getOrComputeSeasonPointsForUsers(userIds, CURRENT_YEAR)
+
+  const withPoints = profiles.map((profile) => ({
     user_id: profile.id,
     username: profile.username || 'Unknown',
     avatar_url: profile.avatar_url,
-    total_points: 0, // Hardcoded for now - will be calculated later
-    rank: index + 1,
+    total_points: seasonPointsByUser[profile.id] ?? 0,
   }))
 
-  return leaderboard
+  withPoints.sort((a, b) => b.total_points - a.total_points)
+
+  const top = withPoints.slice(0, limit)
+
+  return top.map((entry, index) => ({
+    ...entry,
+    rank: index + 1,
+  }))
 }

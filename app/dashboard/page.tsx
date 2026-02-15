@@ -4,9 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '../../components/LogoutButton'
 import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
+import PreviousRaceCard from '../../components/PreviousRaceCard'
 import GlobalLeaderboard from '../../components/GlobalLeaderboard'
-import { getNextEvent, canMakePrediction } from '@/lib/services/meetings'
+import { getNextEvent, getLastEvent, canMakePrediction } from '@/lib/services/meetings'
 import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
+import { getPointsForPrediction } from '@/lib/services/scoring'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -35,7 +37,6 @@ export default async function DashboardPage() {
     .select(`
       id,
       role,
-      points,
       joined_at,
       pools (
         id,
@@ -86,6 +87,22 @@ export default async function DashboardPage() {
   // Get global leaderboard
   const leaderboard = await getGlobalLeaderboard(5)
 
+  // Last (previous) event for previous race card
+  const lastEvent = await getLastEvent()
+  let previousPrediction: typeof existingPrediction = null
+  let previousPoints: number | null = null
+  if (lastEvent) {
+    const { data } = await supabase
+      .from('predictions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('race_id', lastEvent.meeting.id)
+      .single()
+
+    previousPrediction = data ?? null
+    previousPoints = await getPointsForPrediction(previousPrediction, lastEvent.session.session_key)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav />
@@ -124,6 +141,16 @@ export default async function DashboardPage() {
                   nextEvent={nextEvent}
                   predictionAvailability={predictionAvailability}
                   hasPrediction={!!existingPrediction}
+                />
+              )}
+
+              {/* Previous Race Card */}
+              {lastEvent && (
+                <PreviousRaceCard
+                  lastEvent={lastEvent}
+                  hasPrediction={!!previousPrediction}
+                  points={previousPoints}
+                  prediction={previousPrediction}
                 />
               )}
             </div>
@@ -192,7 +219,7 @@ export default async function DashboardPage() {
 
               {/* Global Leaderboard */}
               <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-xl font-bold text-black mb-6">Global leaderboard</h3>
+                <h3 className="text-xl font-bold text-black mb-6">Global leaderboard ({ new Date().getFullYear() })</h3>
                 <GlobalLeaderboard entries={leaderboard} />
               </div>
             </div>

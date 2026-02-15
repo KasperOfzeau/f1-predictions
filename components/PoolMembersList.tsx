@@ -9,7 +9,6 @@ interface Member {
   id: string
   user_id: string
   role: string
-  points: number
   joined_at: string
   profiles: {
     id: string
@@ -24,9 +23,11 @@ interface PoolMembersListProps {
   isAdmin: boolean
   poolId: string
   currentUserId?: string
+  /** Season points per user_id (current year). When provided, the points column is shown. */
+  seasonPointsByUser?: Record<string, number>
 }
 
-export default function PoolMembersList({ members, isAdmin, poolId, currentUserId }: PoolMembersListProps) {
+export default function PoolMembersList({ members, isAdmin, poolId, currentUserId, seasonPointsByUser }: PoolMembersListProps) {
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -131,13 +132,14 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
                 </div>
               </div>
 
-              <div className="flex items-center shrink-0">
-                {/* Points */}
-                <div className="text-right">
-                  <p className="font-bold text-lg text-gray-900">{member.points}</p>
+              {seasonPointsByUser && (
+                <div className="text-right shrink-0">
+                  <p className="font-bold text-lg text-gray-900">
+                    {seasonPointsByUser[member.user_id] ?? 0}
+                  </p>
                   <p className="text-xs text-gray-500">points</p>
                 </div>
-              </div>
+              )}
             </div>
           )
         })

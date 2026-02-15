@@ -12,7 +12,6 @@ export interface PoolMember {
   pool_id: string
   user_id: string
   role: 'admin' | 'member'
-  points: number
   joined_at: string
 }
 
@@ -125,6 +124,7 @@ export interface Prediction {
   position_8: number
   position_9: number
   position_10: number
+  points: number | null
   created_at: string
   updated_at: string
 }
