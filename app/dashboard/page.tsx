@@ -177,12 +177,6 @@ export default async function DashboardPage() {
                           <div className="flex gap-4 text-gray-500">
                             <span>👥 {membership.memberCount} members</span>
                           </div>
-                          <div className="text-right">
-                            <span className="font-bold text-lg text-blue-600">
-                              {membership.points}
-                            </span>
-                            <span className="text-xs text-gray-500 ml-1">pts</span>
-                          </div>
                         </div>
                       </Link>
                     ))}

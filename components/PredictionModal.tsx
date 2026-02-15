@@ -8,11 +8,12 @@ import DriverDropdown from './DriverDropdown'
 interface PredictionModalProps {
   isOpen: boolean
   onClose: () => void
+  onPredictionSaved?: () => void
   session: Session
   meeting: Meeting
 }
 
-export default function PredictionModal({ isOpen, onClose, session, meeting }: PredictionModalProps) {
+export default function PredictionModal({ isOpen, onClose, onPredictionSaved, session, meeting }: PredictionModalProps) {
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [selectedDrivers, setSelectedDrivers] = useState<(number | null)[]>(Array(10).fill(null))
   const [loading, setLoading] = useState(true)
@@ -121,6 +122,7 @@ export default function PredictionModal({ isOpen, onClose, session, meeting }: P
 
     if (result.success) {
       setSuccess(true)
+      onPredictionSaved?.()
       setTimeout(() => {
         onClose()
         setSuccess(false)

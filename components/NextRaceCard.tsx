@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import type { NextEvent, PredictionAvailability } from '@/lib/types'
 import PredictionModal from './PredictionModal'
@@ -12,6 +13,7 @@ interface NextRaceCardProps {
 }
 
 export default function NextRaceCard({ nextEvent, predictionAvailability, hasPrediction }: NextRaceCardProps) {
+  const router = useRouter()
   const [showModal, setShowModal] = useState(false)
   const { session, meeting } = nextEvent
   const sessionDate = new Date(session.date_start)
@@ -106,6 +108,7 @@ export default function NextRaceCard({ nextEvent, predictionAvailability, hasPre
       <PredictionModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
+        onPredictionSaved={() => router.refresh()}
         session={session}
         meeting={meeting}
       />
