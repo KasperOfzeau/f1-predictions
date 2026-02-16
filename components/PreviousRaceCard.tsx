@@ -74,7 +74,7 @@ export default function PreviousRaceCard({ lastEvent, hasPrediction, points, pre
             {sessionDate.toLocaleTimeString('en-UK', {
               hour: '2-digit',
               minute: '2-digit',
-              hour12: true,
+              hour12: false,
               timeZone: 'Europe/Amsterdam',
             })}
           </span>
