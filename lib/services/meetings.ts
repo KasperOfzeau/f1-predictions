@@ -86,6 +86,29 @@ export async function getAllMeetings(year: number): Promise<Meeting[]> {
   return meetings ?? []
 }
 
+/**
+ * Returns true if the first race weekend of the given year has not started yet.
+ * Used to show the season predictions block on the dashboard.
+ */
+export async function isBeforeFirstRaceWeekend(year?: number): Promise<boolean> {
+  const supabase = await createClient()
+  const currentYear = year ?? new Date().getFullYear()
+  const now = new Date()
+
+  await ensureMeetingsSynced(supabase, currentYear)
+
+  const { data: firstMeeting } = await supabase
+    .from('meetings')
+    .select('date_start')
+    .eq('year', currentYear)
+    .order('date_start', { ascending: true })
+    .limit(1)
+    .single()
+
+  if (!firstMeeting?.date_start) return false
+  return new Date(firstMeeting.date_start) > now
+}
+
 // -----------------------------------------------------------------------------
 // Prediction availability (public API; server-only)
 // -----------------------------------------------------------------------------

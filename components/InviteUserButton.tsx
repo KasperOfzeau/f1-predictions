@@ -93,15 +93,14 @@ export default function InviteUserButton({ poolId }: InviteUserButtonProps) {
         Invite users
       </button>
 
-      {isOpen && (
-        <UserSearchModal
-          onClose={() => setIsOpen(false)}
-          onInvite={handleInvite}
-          loading={loading}
-          error={error}
-          success={success}
-        />
-      )}
+      <UserSearchModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onInvite={handleInvite}
+        loading={loading}
+        error={error}
+        success={success}
+      />
     </>
   )
 }

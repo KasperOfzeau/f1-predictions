@@ -128,3 +128,24 @@ export interface Prediction {
   created_at: string
   updated_at: string
 }
+
+export interface SeasonPrediction {
+  id: string
+  user_id: string
+  season_year: number
+  created_at: string
+  updated_at: string
+  points: number | null
+  constructors_1st: string | null
+  constructors_2nd: string | null
+  constructors_3rd: string | null
+  fastest_pitstop_team: string | null
+  drivers_1st: number | null
+  drivers_2nd: number | null
+  drivers_3rd: number | null
+  most_dnfs_driver: number | null
+  fewest_dnfs_driver: number | null
+  safety_car_count: number | null
+  most_overtakes_driver: number | null
+  fewest_overtakes_driver: number | null
+}

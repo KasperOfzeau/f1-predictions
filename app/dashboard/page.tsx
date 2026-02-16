@@ -6,10 +6,11 @@ import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
 import PreviousRaceCard from '../../components/PreviousRaceCard'
 import GlobalLeaderboard from '../../components/GlobalLeaderboard'
-import { getNextEvent, getLastEvent, canMakePrediction } from '@/lib/services/meetings'
+import { getNextEvent, getLastEvent, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
 import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
 import { getPointsForPrediction } from '@/lib/services/scoring'
 import Link from 'next/link'
+import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -87,6 +88,9 @@ export default async function DashboardPage() {
   // Get global leaderboard
   const leaderboard = await getGlobalLeaderboard(5)
 
+  // Display season predictions block only before first race weekend of the year
+  const showSeasonPredictionsBlock = await isBeforeFirstRaceWeekend()
+
   // Last (previous) event for previous race card
   const lastEvent = await getLastEvent()
   let previousPrediction: typeof existingPrediction = null
@@ -111,7 +115,7 @@ export default async function DashboardPage() {
         <div className="px-4 py-6 sm:px-0">
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Left Column - Profile & Next Race */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 flex flex-col gap-6">
               {/* Profile Card */}
               <div className="bg-white shadow rounded-lg p-6">
                 <h2 className="text-2xl font-bold mb-4 text-carbon-black">
@@ -156,7 +160,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Right Column - Pools & Leaderboard */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 flex flex-col gap-6">
               {/* My Pools */}
               <div className="bg-white shadow rounded-lg p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -216,6 +220,9 @@ export default async function DashboardPage() {
                   </div>
                 )}
               </div>
+
+              {/* Seizoensvoorspellingen – alleen vóór eerste raceweekend */}
+              <SeasonPredictionsBlock show={showSeasonPredictionsBlock} />
 
               {/* Global Leaderboard */}
               <div className="bg-white shadow rounded-lg p-6">

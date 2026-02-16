@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Modal from './Modal'
 
 interface DeletePoolButtonProps {
   poolId: string
@@ -46,44 +47,43 @@ export default function DeletePoolButton({ poolId, poolName }: DeletePoolButtonP
         Delete pool
       </button>
 
-      {/* Confirmation Modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Delete pool?</h3>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete &quot;<strong>{poolName}</strong>&quot;?
-              This will remove all members, predictions, and data associated with this pool.
-              <br /><br />
-              <strong className="text-red-600">This action cannot be undone.</strong>
-            </p>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                disabled={loading}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={loading}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium disabled:opacity-50"
-              >
-                {loading ? 'Deleting...' : 'Delete pool'}
-              </button>
-            </div>
+      <Modal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        title="Delete pool?"
+        size="md"
+        footer={
+          <>
+            <button
+              onClick={() => setShowConfirm(false)}
+              disabled={loading}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={loading}
+              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium disabled:opacity-50"
+            >
+              {loading ? 'Deleting...' : 'Delete pool'}
+            </button>
+          </>
+        }
+      >
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
           </div>
-        </div>
-      )}
+        )}
+
+        <p className="text-gray-600">
+          Are you sure you want to delete &quot;<strong>{poolName}</strong>&quot;?
+          This will remove all members, predictions, and data associated with this pool.
+          <br /><br />
+          <strong className="text-red-600">This action cannot be undone.</strong>
+        </p>
+      </Modal>
     </>
   )
 }
