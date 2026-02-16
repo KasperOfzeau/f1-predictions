@@ -40,7 +40,7 @@ export default async function NotificationsPage() {
 
       <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold mb-6">Notifications</h1>
+          <h1 className="text-3xl font-bold mb-6 text-white">Notifications</h1>
 
           {!notifications || notifications.length === 0 ? (
             <div className="bg-white shadow rounded-lg p-8 text-center">

@@ -72,7 +72,7 @@ export default async function InvitesPage() {
 
       <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold mb-6">Pool invitations</h1>
+          <h1 className="text-3xl font-bold mb-6 text-white">Pool invitations</h1>
 
           {invitesError && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
