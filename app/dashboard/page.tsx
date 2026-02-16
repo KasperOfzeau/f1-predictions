@@ -5,9 +5,7 @@ import LogoutButton from '../../components/LogoutButton'
 import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
 import PreviousRaceCard from '../../components/PreviousRaceCard'
-import GlobalLeaderboard from '../../components/GlobalLeaderboard'
 import { getNextEvent, getLastEvent, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
-import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
 import { getPointsForPrediction } from '@/lib/services/scoring'
 import Link from 'next/link'
 import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
@@ -84,9 +82,6 @@ export default async function DashboardPage() {
 
     existingPrediction = data
   }
-
-  // Get global leaderboard
-  const leaderboard = await getGlobalLeaderboard(5)
 
   // Display season predictions block only before first race weekend of the year
   const showSeasonPredictionsBlock = await isBeforeFirstRaceWeekend()
@@ -224,11 +219,6 @@ export default async function DashboardPage() {
               {/* Seizoensvoorspellingen – alleen vóór eerste raceweekend */}
               <SeasonPredictionsBlock show={showSeasonPredictionsBlock} />
 
-              {/* Global Leaderboard */}
-              <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-xl font-bold text-carbon-black mb-6">Global leaderboard ({ new Date().getFullYear() })</h3>
-                <GlobalLeaderboard entries={leaderboard} />
-              </div>
             </div>
           </div>
         </div>

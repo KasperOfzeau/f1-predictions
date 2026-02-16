@@ -51,24 +51,23 @@ export default function Nav() {
   const displayLetter = fullName?.charAt(0)?.toUpperCase() || username?.charAt(0)?.toUpperCase() || '?'
 
   return (
-    <nav className="bg-carbon-black border-b border-f1-black shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-[#0a0a0c] shadow-sm">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/dashboard">
-              <h1 className="text-xl font-bold text-f1-red">F1 Predictions</h1>
+            <Link href="/">
+              <h1 className="text-xl font-bold text-white">The Prediction Paddock</h1>
             </Link>
           </div>
 
-          {username && (
+          {username ? (
             <div className="flex items-center gap-6">
-              <Link
+               <Link
                 href="/dashboard"
                 className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
               >
                 Dashboard
-              </Link>
-
+              </Link>                   
               <Link
                 href="/notifications"
                 className="relative text-zinc-300 hover:text-white transition-colors"
@@ -115,6 +114,21 @@ export default function Nav() {
                   )}
                 </div>
                 <span className="hidden sm:inline">@{username}</span>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-6">
+              <Link
+                href="/login"
+                className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+              >
+                Register
               </Link>
             </div>
           )}

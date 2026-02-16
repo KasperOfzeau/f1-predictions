@@ -10,10 +10,15 @@ const CURRENT_YEAR = new Date().getFullYear()
 /**
  * Returns the end time of the last finished race/sprint (ISO string).
  * Used to decide if cached season scores are still valid.
+ * Returns null on error (e.g. RLS when not logged in) so callers can still proceed.
  */
 export async function getLastFinishedRaceEnd(): Promise<string | null> {
-  const last = await getLastEvent()
-  return last?.session?.date_end ?? null
+  try {
+    const last = await getLastEvent()
+    return last?.session?.date_end ?? null
+  } catch {
+    return null
+  }
 }
 
 /**

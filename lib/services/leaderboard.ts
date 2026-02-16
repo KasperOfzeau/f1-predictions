@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getOrComputeSeasonPointsForUsers } from '@/lib/services/seasonScores'
 
 export interface LeaderboardEntry {
@@ -13,10 +13,11 @@ const CURRENT_YEAR = new Date().getFullYear()
 
 /**
  * Get global leaderboard - top players by season score (current year).
+ * Uses admin client so the leaderboard can be shown on the public home page (no RLS block).
  * @param limit - Number of top players to return (default 5)
  */
 export async function getGlobalLeaderboard(limit: number = 5): Promise<LeaderboardEntry[]> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: profiles, error } = await supabase
     .from('profiles')
