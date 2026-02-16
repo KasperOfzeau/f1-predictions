@@ -101,7 +101,7 @@ export default function SeasonPredictionsBlock({ show }: SeasonPredictionsBlockP
   return (
     <>
       <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-xl font-bold text-carbon-black mb-2">Season predictions</h3>
+        <h3 className="text-xl font-bold text-carbon-black mb-2">Season predictions ({getCurrentSeasonYear()})</h3>
         <p className="text-gray-600 text-sm mb-4">
           Make your predictions for the season before the first race weekend starts.
         </p>
