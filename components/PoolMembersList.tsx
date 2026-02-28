@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface Member {
   id: string
@@ -80,7 +81,10 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
               key={member.id}
               className="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <div className="flex items-center gap-4">
+              <Link
+                href={`/profile/${encodeURIComponent(member.profiles.username)}`}
+                className="flex items-center gap-4 min-w-0 flex-1 hover:opacity-90"
+              >
                 {/* Avatar */}
                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
                   {member.profiles.avatar_url ? (
@@ -115,19 +119,21 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
                         You
                       </span>
                     )}
-                    {canRemove && (
-                      <button
-                        onClick={() => handleRemoveMember(member.id, member.user_id)}
-                        disabled={removingId === member.id}
-                        title="Remove member from pool"
-                        className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                      >
-                        {removingId === member.id ? 'Removing…' : 'Remove'}
-                      </button>
-                    )}
                   </div>
                   <p className="text-sm text-gray-600">{member.profiles.full_name}</p>
                 </div>
+              </Link>
+              <div className="flex items-center gap-2 shrink-0">
+                {canRemove && (
+                  <button
+                    onClick={() => handleRemoveMember(member.id, member.user_id)}
+                    disabled={removingId === member.id}
+                    title="Remove member from pool"
+                    className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    {removingId === member.id ? 'Removing…' : 'Remove'}
+                  </button>
+                )}
               </div>
 
               {seasonPointsByUser && (

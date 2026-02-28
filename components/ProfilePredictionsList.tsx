@@ -10,12 +10,15 @@ interface ProfilePredictionsListProps {
   items: PredictionWithMeta[]
   seasonPrediction: SeasonPrediction | null
   seasonYear: number
+  /** When false, empty state says "They haven't made...". Default true (own profile). */
+  isOwnProfile?: boolean
 }
 
 export default function ProfilePredictionsList({
   items,
   seasonPrediction,
   seasonYear,
+  isOwnProfile = true,
 }: ProfilePredictionsListProps) {
   const [selected, setSelected] = useState<PredictionWithMeta | null>(null)
   const [showSeasonModal, setShowSeasonModal] = useState(false)
@@ -26,7 +29,9 @@ export default function ProfilePredictionsList({
 
   if (!hasAny) {
     return (
-      <p className="text-zinc-600 text-sm">You haven’t made any predictions yet.</p>
+      <p className="text-zinc-600 text-sm">
+        {isOwnProfile ? "You haven't made any predictions yet." : "They haven't made any predictions yet."}
+      </p>
     )
   }
 

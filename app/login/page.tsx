@@ -59,11 +59,11 @@ function LoginForm() {
         </p>
       </div>
 
-      {showConfirmMessage && (
+      {/* {showConfirmMessage && (
         <div className="bg-white border border-zinc-600 text-black mt-4 px-4 py-3 rounded">
           Please check your email and click the confirmation link to activate your account. Once you&apos;ve confirmed your email, you can log in below.
         </div>
-      )}
+      )} */}
 
       <form className="mt-8 space-y-6" onSubmit={handleLogin}>
         {error && (
