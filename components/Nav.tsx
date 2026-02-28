@@ -94,7 +94,7 @@ export default function Nav() {
               </Link>
 
               <Link
-                href="/settings"
+                href="/profile"
                 className="flex items-center gap-2 text-sm text-zinc-300 hover:text-white transition-colors"
               >
                 <div className="relative w-8 h-8 rounded-full overflow-hidden bg-zinc-600 shrink-0 ring-2 ring-zinc-500 hover:ring-f1-red transition-all">
