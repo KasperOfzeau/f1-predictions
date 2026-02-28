@@ -186,7 +186,7 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
               />
             ) : (
               <span className="absolute inset-0 flex items-center justify-center text-2xl font-semibold text-gray-500">
-                {fullName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || '?'}
+                {username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || '?'}
               </span>
             )}
           </div>

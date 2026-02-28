@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react'
 export default function Nav() {
   const [username, setUsername] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [fullName, setFullName] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
@@ -20,14 +19,13 @@ export default function Nav() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('username, avatar_url, full_name')
+        .select('username, avatar_url')
         .eq('id', user.id)
         .single()
 
       if (profile) {
         setUsername(profile.username ?? null)
         setAvatarUrl(profile.avatar_url ?? null)
-        setFullName(profile.full_name ?? null)
       }
 
       const { count } = await supabase
@@ -48,7 +46,7 @@ export default function Nav() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const displayLetter = fullName?.charAt(0)?.toUpperCase() || username?.charAt(0)?.toUpperCase() || '?'
+  const displayLetter = username?.charAt(0)?.toUpperCase() || '?'
 
   return (
     <nav className="bg-[#0a0a0c] shadow-sm">

@@ -26,8 +26,7 @@ export default async function ProfilePage() {
     .eq('id', user.id)
     .single()
 
-  const displayLetter = profile?.full_name?.charAt(0)?.toUpperCase()
-    || profile?.username?.charAt(0)?.toUpperCase()
+  const displayLetter = profile?.username?.charAt(0)?.toUpperCase()
     || user.email?.charAt(0)?.toUpperCase()
     || '?'
 

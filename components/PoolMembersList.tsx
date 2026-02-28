@@ -57,9 +57,7 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
   }
 
   const getDisplayLetter = (member: Member) => {
-    return member.profiles.full_name?.charAt(0)?.toUpperCase()
-      || member.profiles.username?.charAt(0)?.toUpperCase()
-      || '?'
+    return member.profiles.username?.charAt(0)?.toUpperCase() || '?'
   }
 
   return (
