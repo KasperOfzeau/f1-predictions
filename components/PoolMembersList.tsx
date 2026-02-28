@@ -120,7 +120,6 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600">{member.profiles.full_name}</p>
                 </div>
               </Link>
               <div className="flex items-center gap-2 shrink-0">
