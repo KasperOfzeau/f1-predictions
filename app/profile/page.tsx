@@ -99,6 +99,10 @@ export default async function ProfilePage() {
                 <dt className="text-sm font-medium text-zinc-500">Email</dt>
                 <dd className="mt-0.5 text-carbon-black">{user.email}</dd>
               </div>
+              <div>
+                <dt className="text-sm font-medium text-zinc-500">Member since</dt>
+                <dd className="mt-0.5 text-carbon-black">{new Date(user.created_at).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric' })}</dd>
+              </div>
             </div>
             {/* My predictions */}
             <div className="px-6 py-6 border-t border-zinc-200">
