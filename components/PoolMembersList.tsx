@@ -128,7 +128,7 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
                     onClick={() => handleRemoveMember(member.id, member.user_id)}
                     disabled={removingId === member.id}
                     title="Remove member from pool"
-                    className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 disabled:pointer-events-none sm:mr-4 mr-2"
                   >
                     {removingId === member.id ? 'Removing…' : 'Remove'}
                   </button>
