@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import type { LeaderboardEntry } from '@/lib/services/leaderboard'
 
 interface GlobalLeaderboardProps {
@@ -16,9 +17,10 @@ export default function GlobalLeaderboard({ entries }: GlobalLeaderboardProps) {
         <p className="text-white/50 text-center py-6">No players yet</p>
       ) : (
         entries.map((entry) => (
-            <div
+            <Link
               key={entry.user_id}
-              className="flex-1 flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg overflow-hidden border border-white/10 bg-white/5 min-h-0"
+              href={`/profile/${encodeURIComponent(entry.username)}`}
+              className="flex-1 flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-lg overflow-hidden border border-white/10 bg-white/5 min-h-0 hover:border-f1-red hover:bg-gray-50 transition-colors"
             >
               <div className="text-xs text-white/60 min-w-[20px] text-center shrink-0 tabular-nums">
                 {entry.rank}
@@ -51,7 +53,7 @@ export default function GlobalLeaderboard({ entries }: GlobalLeaderboardProps) {
                 <p className="font-bold text-base sm:text-lg text-white">{entry.total_points}</p>
                 <p className="text-xs text-white/50">points</p>
               </div>
-            </div>
+            </Link>
           ))
       )}
     </div>

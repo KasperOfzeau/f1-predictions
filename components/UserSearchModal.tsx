@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
+import Link from 'next/link'
 import Modal from './Modal'
 
 interface UserSearchModalProps {
@@ -92,7 +93,14 @@ export default function UserSearchModal({
               <p className="text-sm text-gray-600">{user.full_name}</p>
             </div>
             <button
-              onClick={() => onInvite(user.id)}
+              type="button"
+              data-user-id={user.id}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                const userId = (e.currentTarget as HTMLButtonElement).dataset.userId
+                if (userId) onInvite(userId)
+              }}
               disabled={loading}
               className="bg-f1-red hover:bg-f1-red-hover text-white px-4 py-1 rounded text-sm disabled:opacity-50"
             >

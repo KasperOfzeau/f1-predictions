@@ -105,7 +105,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
         <div className="px-4 py-6 sm:px-0">
           {/* Pool Header */}
           <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-4 flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <h1 className="text-3xl font-bold mb-2">{pool.name}</h1>
                 {pool.description && (

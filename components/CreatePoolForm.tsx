@@ -67,9 +67,11 @@ export default function CreatePoolForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="e.g., F1 2025 Season"
           maxLength={50}
         />
+        <p className="mt-1 text-xs text-gray-500">
+          e.g., GP2 Engine support group, No Michael No That's So Not Right, DTS Believers Anonymous
+        </p>
       </div>
 
       <div>
@@ -82,7 +84,7 @@ export default function CreatePoolForm() {
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="What's this pool about?"
+          placeholder="e.g. Winner gets a Lego set!"
           maxLength={500}
         />
         <p className="mt-1 text-xs text-gray-500">

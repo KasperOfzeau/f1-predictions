@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { Driver, Prediction } from '@/lib/types'
+import { getDriversForMeeting } from '@/lib/services/predictions'
 import Modal from './Modal'
 
 type ResultStatus = 'correct' | 'in_top10' | 'wrong'
@@ -9,7 +10,10 @@ type ResultStatus = 'correct' | 'in_top10' | 'wrong'
 interface PreviousRaceResultModalProps {
   isOpen: boolean
   onClose: () => void
-  sessionKey: number
+  sessionKey: number | null
+  meetingKey?: number | null
+  /** Qualifying session key – used to fetch drivers for accurate data */
+  qualifyingSessionKey?: number | null
   meetingName: string
   prediction: Prediction | null
   points: number | null
@@ -51,10 +55,19 @@ function driverByNumber(drivers: Driver[], driverNumber: number): Driver | undef
   return drivers.find((d) => d.driver_number === driverNumber)
 }
 
+async function fetchDriversBySessionKey(sessionKey: number): Promise<Driver[]> {
+  const res = await fetch(`/api/drivers?session_key=${sessionKey}`)
+  if (!res.ok) return []
+  const data = await res.json()
+  return data.drivers ?? []
+}
+
 export default function PreviousRaceResultModal({
   isOpen,
   onClose,
   sessionKey,
+  meetingKey,
+  qualifyingSessionKey,
   meetingName,
   prediction,
   points,
@@ -63,19 +76,76 @@ export default function PreviousRaceResultModal({
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [predictionOnly, setPredictionOnly] = useState(false)
 
+  // No session key: show prediction only – fetch drivers via qualifying session key (accurate) or meeting key
   useEffect(() => {
-    if (!isOpen || !sessionKey) return
+    if (!isOpen || !prediction) return
+    if (sessionKey != null) return
+
+    if (meetingKey == null && qualifyingSessionKey == null) {
+      setLoading(false)
+      setPredictionOnly(true)
+      setError(null)
+      setResultOrder(null)
+      return
+    }
+
+    console.log(qualifyingSessionKey)
+
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    setPredictionOnly(true)
+    setResultOrder(null)
+
+    const loadDrivers = async () => {
+      if (qualifyingSessionKey != null) {
+        const d = await fetchDriversBySessionKey(qualifyingSessionKey)
+        if (!cancelled) {
+          setDrivers(d)
+          setLoading(false)
+          return
+        }
+      }
+      if (meetingKey != null && !cancelled) {
+        const d = await getDriversForMeeting(meetingKey)
+        if (!cancelled) setDrivers(d)
+      }
+      if (!cancelled) setLoading(false)
+    }
+    loadDrivers()
+    return () => { cancelled = true }
+  }, [isOpen, sessionKey, meetingKey, qualifyingSessionKey, prediction])
+
+  // Has session key: try result, fallback to prediction-only whenever result fails
+  useEffect(() => {
+    if (!isOpen || sessionKey == null) return
 
     const fetchResult = async () => {
       setLoading(true)
       setError(null)
+      setPredictionOnly(false)
       try {
         const res = await fetch(`/api/race-result?session_key=${sessionKey}`)
         if (!res.ok) {
           const data = await res.json().catch(() => ({}))
           setError(data.error || 'Could not load result')
           setResultOrder(null)
+          if (prediction) {
+            setPredictionOnly(true)
+            const driversSessionKey = qualifyingSessionKey ?? sessionKey
+            let d: Driver[] = []
+            if (driversSessionKey != null) {
+              d = await fetchDriversBySessionKey(driversSessionKey)
+              setDrivers(d)
+            }
+            if (d.length === 0 && meetingKey != null) {
+              d = await getDriversForMeeting(meetingKey)
+              setDrivers(d)
+            }
+          }
+          setLoading(false)
           return
         }
         const data = await res.json()
@@ -84,13 +154,25 @@ export default function PreviousRaceResultModal({
       } catch {
         setError('Could not load result')
         setResultOrder(null)
+        if (prediction) {
+          setPredictionOnly(true)
+          const driversSessionKey = qualifyingSessionKey ?? sessionKey
+          if (driversSessionKey != null) {
+            const d = await fetchDriversBySessionKey(driversSessionKey)
+            setDrivers(d)
+          }
+          if (meetingKey != null) {
+            const d = await getDriversForMeeting(meetingKey)
+            setDrivers(d)
+          }
+        }
       } finally {
         setLoading(false)
       }
     }
 
     fetchResult()
-  }, [isOpen, sessionKey])
+  }, [isOpen, sessionKey, meetingKey, qualifyingSessionKey, prediction])
 
   const predOrder = prediction
     ? [
@@ -124,9 +206,60 @@ export default function PreviousRaceResultModal({
       }
     >
       {loading && (
-        <p className="text-center text-gray-500 py-6">Loading result…</p>
+        <p className="text-center text-gray-500 py-6">
+          {sessionKey != null ? 'Loading result…' : 'Loading prediction…'}
+        </p>
       )}
-      {error && !loading && (
+      {!loading && predictionOnly && prediction && (
+        <>
+          {error && (
+            <p className="text-center text-amber-600 py-2 text-sm font-medium">
+              Result not yet available
+            </p>
+          )}
+          <p className="text-center text-gray-500 text-sm pb-3">Your prediction</p>
+          <div className="flex items-center gap-2 px-2 py-1.5 border-b border-gray-200 text-xs font-medium uppercase tracking-wide text-gray-500 mb-1">
+            <div className="min-w-[28px] text-center shrink-0">#</div>
+            <div className="flex-1 min-w-0">Prediction</div>
+          </div>
+          <div className="space-y-1">
+            {predOrder?.map((driverNumber, index) => {
+              const position = index + 1
+              const driverInfo = driverByNumber(drivers, driverNumber)
+              return (
+                <div
+                  key={`${position}-${driverNumber}`}
+                  className="flex items-center gap-2 px-2 py-1.5 border border-gray-200 rounded-md overflow-hidden"
+                >
+                  <div className="text-sm font-bold text-gray-500 min-w-[28px] text-center shrink-0">
+                    {position}
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    {driverInfo ? (
+                      <>
+                        <span
+                          className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{
+                            backgroundColor: driverInfo.team_colour
+                              ? `#${driverInfo.team_colour}`
+                              : '#e2e8f0',
+                          }}
+                        />
+                        <span className="font-medium text-sm text-gray-900">
+                          {driverInfo.name_acronym}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-gray-400 text-sm">#{driverNumber}</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+      {error && !loading && !predictionOnly && (
         <p className="text-center text-red-600 py-6">{error}</p>
       )}
       {!loading && !error && resultOrder && resultOrder.length >= 10 && (
