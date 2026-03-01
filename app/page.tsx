@@ -83,14 +83,14 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-carbon-black">
+    <div className="min-h-112 sm:min-h-128 md:min-h-144 bg-carbon-black">
       <Nav />
       <main>
           {nextEvent ? (
-            <div className="hero relative h-screen w-full flex flex-col justify-start items-center">
+            <div className="hero relative min-h-75 sm:min-h-112 md:min-h-128 w-full flex flex-col justify-start items-center pb-0 sm:pb-12 pt-8 sm:pt-12 md:pt-16">
               {nextEvent.meeting.circuit_image && (
                 <div className="absolute inset-0 flex justify-center items-center pointer-events-none overflow-hidden">
-                  <div className="relative w-full h-full scale-125">
+                  <div className="relative w-full h-full min-h-96 sm:min-h-112 md:min-h-128 scale-110 sm:scale-125">
                     <Image
                       src={nextEvent.meeting.circuit_image}
                       alt="Circuit Image {nextEvent.meeting.circuit_short_name}"
@@ -101,19 +101,19 @@ export default async function HomePage() {
                   </div>
                 </div>
               )}
-              <div className="relative z-10 space-y-4 text-center mt-24">
-                <h2 className="text-8xl text-white">
+              <div className="relative z-10 space-y-3 sm:space-y-4 text-center mt-8 sm:mt-12 md:mt-16 px-4">
+                <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl text-white">
                     {nextEvent.meeting.meeting_name.split(' ').slice(0, -2).join(' ')}{' '}
                     <b>{nextEvent.meeting.meeting_name.split(' ').slice(-2).join(' ')}</b>
                 </h2>
-                <p className="text-2xl sm:text-3xl text-white opacity-70">
+                <p className="text-xl sm:text-2xl md:text-3xl text-white opacity-70">
                   {getDaysToGo(nextEvent.session.date_start)} days to go
                 </p>
               </div>
-              <div className="absolute left-0 right-0 top-[60%] translate-y-[60%] flex justify-center">
+              <div className="relative z-10 mt-8 sm:mt-10 md:mt-12 flex justify-center">
                 <Link
                   href="/prediction/race"
-                  className="px-6 py-2 rounded-full font-medium transition-colors border-4 border-f1-red text-white cursor-pointer text-center"
+                  className="px-5 py-2 sm:px-6 rounded-full font-medium transition-colors border-2 sm:border-4 border-f1-red text-white cursor-pointer text-center text-sm sm:text-base"
                 >
                   <b>Enter</b> your prediction
                 </Link>
@@ -199,7 +199,7 @@ export default async function HomePage() {
                 <GlobalLeaderboard entries={leaderboard} />
               </div>
             </div>
-            <div className="relative rounded-xl border border-white/10 p-6 overflow-hidden min-h-[140px] bg-white/5">
+            <div className="relative rounded-xl border border-white/10 p-6 overflow-hidden min-h-[450px] bg-white/5">
               {lastEvent && (
                 <div className="absolute inset-0 opacity-25">
                   <Image
