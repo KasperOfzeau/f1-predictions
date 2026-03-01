@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Nav from '@/components/Nav'
 import { getRecentPredictionsForUser } from '@/lib/services/profilePredictions'
 import ProfilePredictionsList from '@/components/ProfilePredictionsList'
@@ -50,12 +51,14 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
   const currentSeasonYear = new Date().getMonth() === 0
     ? new Date().getFullYear() - 1
     : new Date().getFullYear()
-  const { data: seasonPrediction } = await supabase
+  // Use admin client so we can read any user's season prediction (RLS only allows own rows with anon).
+  const admin = createAdminClient()
+  const { data: seasonPrediction } = await admin
     .from('season_predictions')
     .select('*')
     .eq('user_id', profile.id)
     .eq('season_year', currentSeasonYear)
-    .maybeSingle()
+    .maybeSingle()   
 
   return (
     <div className="min-h-screen bg-carbon-black">
