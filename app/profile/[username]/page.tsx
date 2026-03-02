@@ -51,9 +51,9 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
   const currentSeasonYear = new Date().getMonth() === 0
     ? new Date().getFullYear() - 1
     : new Date().getFullYear()
-  // Use admin client so we can read any user's season prediction (RLS only allows own rows with anon).
-  const admin = createAdminClient()
-  const { data: seasonPrediction } = await admin
+    // Use admin client so we can read any user's season prediction (RLS only allows own rows with anon).
+    const admin = createAdminClient()
+    const { data: seasonPrediction } = await admin
     .from('season_predictions')
     .select('*')
     .eq('user_id', profile.id)
