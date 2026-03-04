@@ -59,13 +59,7 @@ export default function Nav() {
           </div>
 
           {username ? (
-            <div className="flex items-center gap-6">
-               <Link
-                href="/dashboard"
-                className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
-              >
-                Dashboard
-              </Link>                   
+            <div className="flex items-center gap-6">               
               <Link
                 href="/notifications"
                 className="relative text-zinc-300 hover:text-white transition-colors"
