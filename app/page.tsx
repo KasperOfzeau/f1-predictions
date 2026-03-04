@@ -145,15 +145,17 @@ export default async function HomePage() {
             <div className="bg-white/5 rounded-xl border border-white/10 p-6">
               <div className="flex justify-between items-center gap-3 mb-4">
                 <h3 className="text-2xl font-semibold text-white">My pools</h3>
-                <Link
-                  href="/pools/create"
-                  className="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-f1-red hover:underline"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  New pool
-                </Link>
+                {user ? (
+                  <Link
+                    href="/pools/create"
+                    className="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-f1-red hover:underline"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    New pool
+                  </Link>
+                ) : null}
               </div>
               {user ? (
                 <div className="space-y-3">
@@ -185,7 +187,7 @@ export default async function HomePage() {
                 </div>
               ) : (
                 <div className="relative">
-                  <div className="space-y-3 blur-xs pointer-events-none select-none opacity-60">
+                  <div className="space-y-3 blur-[2px] pointer-events-none select-none opacity-60">
                     {[
                       { name: 'DTS Believers Anonymous', members: 12 },
                       { name: 'We Crashed (Into Each Other)', members: 8 },
