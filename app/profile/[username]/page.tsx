@@ -106,7 +106,7 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
                     </svg>
                     Profile settings
                   </Link>
-                  <LogoutButton variant="link" />
+                  <LogoutButton />
                 </div>
               )}
             </div>
