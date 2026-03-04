@@ -14,7 +14,7 @@ import HomeHero from '@/components/HomeHero'
 import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
 
 export const metadata: Metadata = {
-  title: "Home",
+  title: "The Prediction Paddock",
   description: "Predict F1 race results and compete with your friends in pools",
 }
 
@@ -143,12 +143,23 @@ export default async function HomePage() {
 
           <section className={`grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto px-6 ${showSeasonPredictionsBlock ? 'pt-6 pb-16' : 'py-16'}`}>
             <div className="bg-white/5 rounded-xl border border-white/10 p-6">
-              <h3 className="text-2xl font-semibold text-white mb-4">My pools</h3>
+              <div className="flex justify-between items-center gap-3 mb-4">
+                <h3 className="text-2xl font-semibold text-white">My pools</h3>
+                <Link
+                  href="/pools/create"
+                  className="shrink-0 inline-flex items-center gap-1.5 text-sm font-medium text-f1-red hover:underline"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  New pool
+                </Link>
+              </div>
               {user ? (
                 <div className="space-y-3">
                   {poolsWithMemberCount.length === 0 ? (
                     <p className="text-white/70 text-sm text-center">
-                      <Link href="/pools/create" className="text-f1-red hover:underline">Maak een pool</Link> of vraag een uitnodiging.
+                      <Link href="/pools/create" className="text-f1-red hover:underline">Create a pool</Link> or ask for an invitation.
                     </p>
                   ) : (
                     poolsWithMemberCount.map((membership) => (

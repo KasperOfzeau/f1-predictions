@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "F1 Predictions",
-    template: "%s | F1 Predictions",
+    default: "The Prediction Paddock",
+    template: "%s | The Prediction Paddock",
   },
-  description: "Predict F1 race results and compete with your friends",
+  description: "Predict F1 race results and compete with your friends in pools",
 };
 
 export default function RootLayout({
