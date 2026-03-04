@@ -4,9 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '../../components/LogoutButton'
 import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
-import PreviousRaceCard from '../../components/PreviousRaceCard'
-import { getNextEvent, getLastEvent, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
-import { getPointsForPrediction } from '@/lib/services/scoring'
+import { getNextEvent, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
 import Link from 'next/link'
 import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
 
@@ -86,22 +84,6 @@ export default async function DashboardPage() {
   // Display season predictions block only before first race weekend of the year
   const showSeasonPredictionsBlock = await isBeforeFirstRaceWeekend()
 
-  // Last (previous) event for previous race card
-  const lastEvent = await getLastEvent()
-  let previousPrediction: typeof existingPrediction = null
-  let previousPoints: number | null = null
-  if (lastEvent) {
-    const { data } = await supabase
-      .from('predictions')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('race_id', lastEvent.meeting.id)
-      .single()
-
-    previousPrediction = data ?? null
-    previousPoints = await getPointsForPrediction(previousPrediction, lastEvent.session.session_key)
-  }
-
   return (
     <div className="min-h-screen bg-carbon-black">
       <Nav />
@@ -133,25 +115,6 @@ export default async function DashboardPage() {
                   <LogoutButton />
                 </div>
               </div>
-
-              {/* Next Event Card */}
-              {nextEvent && (
-                <NextRaceCard
-                  nextEvent={nextEvent}
-                  predictionAvailability={predictionAvailability}
-                  hasPrediction={!!existingPrediction}
-                />
-              )}
-
-              {/* Previous Race Card */}
-              {lastEvent && (
-                <PreviousRaceCard
-                  lastEvent={lastEvent}
-                  hasPrediction={!!previousPrediction}
-                  points={previousPoints}
-                  prediction={previousPrediction}
-                />
-              )}
             </div>
 
             {/* Right Column - Pools & Leaderboard */}

@@ -1,11 +1,15 @@
 import type { Metadata } from 'next'
+import type { Prediction } from '@/lib/types'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 import GlobalLeaderboard from '@/components/GlobalLeaderboard'
 import { getNextEvent, getNextEventFromApi, getLastEventForPublic } from '@/lib/services/meetings'
+import { getQualifyingForMeeting } from '@/lib/services/sessions'
 import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
+import { getPointsForPrediction } from '@/lib/services/scoring'
+import PreviousRaceCard from '@/components/PreviousRaceCard'
 
 export const metadata: Metadata = {
   title: "Home",
@@ -19,13 +23,6 @@ function getDaysToGo(dateStart: string): number {
   today.setHours(0, 0, 0, 0)
   const diffMs = start.getTime() - today.getTime()
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
-}
-
-/** Build /images/circuits/ path from API circuit_short_name: spaces → -, then .jpg/.png/.webp. */
-function getCircuitImageSrc(circuitShortName: string): string {
-  const base = circuitShortName.replace(/\s+/g, '-')
-  const hasExtension = /\.(jpe?g|png|webp)$/i.test(base)
-  return `/images/circuits/${hasExtension ? base : `${base}.jpg`}`
 }
 
 export default async function HomePage() {
@@ -80,6 +77,29 @@ export default async function HomePage() {
         }
       })
     )
+  }
+
+  // When logged in: check if user has a prediction for the last race and get points
+  let previousPrediction: Prediction | null = null
+  let previousPoints: number | null = null
+  if (user && lastEvent) {
+    const { data } = await supabase
+      .from('predictions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('race_id', lastEvent.meeting.id)
+      .single()
+    previousPrediction = data ?? null
+    previousPoints = await getPointsForPrediction(previousPrediction, lastEvent.session.session_key)
+  }
+
+  // Qualifying session key voor drivers in result modal (race weekend = qualifying session voor driverlijst)
+  let qualifyingSessionKey: number | null = null
+  if (lastEvent) {
+    const qualifyingSessions = await getQualifyingForMeeting(lastEvent.meeting.meeting_key)
+    const qualifyingSession = qualifyingSessions.find((s) => s.session_name === 'Qualifying')
+      ?? qualifyingSessions[0] ?? null
+    qualifyingSessionKey = qualifyingSession?.session_key ?? null
   }
 
   return (
@@ -199,33 +219,14 @@ export default async function HomePage() {
                 <GlobalLeaderboard entries={leaderboard} />
               </div>
             </div>
-            <div className="relative rounded-xl border border-white/10 p-6 overflow-hidden min-h-[450px] bg-white/5">
-              {lastEvent && (
-                <div className="absolute inset-0 opacity-25">
-                  <Image
-                    src={getCircuitImageSrc(lastEvent.meeting.circuit_short_name)}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-              )}
-              <h3 className="relative z-10 text-2xl font-semibold text-white mb-2">Previous race</h3>
-              <div className="absolute top-1/2 z-10 left-0 right-0 -translate-y-1/2 text-center p-6">
-                <h4 className="text-white/80 text-4xl font-bold">{lastEvent?.meeting.meeting_name ?? '—'}</h4>
-                {lastEvent && (
-                  <p className="text-white/60 mt-2 text-lg">
-                    {new Date(lastEvent.session.date_start).toLocaleDateString('en-GB', {
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </p>
-                )}
-              </div>
-             </div>
+            <PreviousRaceCard
+              lastEvent={lastEvent}
+              hasPrediction={!!previousPrediction}
+              points={previousPoints}
+              prediction={previousPrediction}
+              isLoggedIn={!!user}
+              qualifyingSessionKey={qualifyingSessionKey}
+            />
           </section>
       </main>
     </div>

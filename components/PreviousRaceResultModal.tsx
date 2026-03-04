@@ -91,8 +91,6 @@ export default function PreviousRaceResultModal({
       return
     }
 
-    console.log(qualifyingSessionKey)
-
     let cancelled = false
     setLoading(true)
     setError(null)
@@ -150,7 +148,13 @@ export default function PreviousRaceResultModal({
         }
         const data = await res.json()
         setResultOrder(data.resultOrder)
-        setDrivers(data.drivers || [])
+        // Drivers voor namen/teams ophalen via qualifying session key (nauwkeuriger voor dat weekend)
+        if (qualifyingSessionKey != null) {
+          const d = await fetchDriversBySessionKey(qualifyingSessionKey)
+          setDrivers(d.length > 0 ? d : (data.drivers || []))
+        } else {
+          setDrivers(data.drivers || [])
+        }
       } catch {
         setError('Could not load result')
         setResultOrder(null)
