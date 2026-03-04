@@ -5,11 +5,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 import GlobalLeaderboard from '@/components/GlobalLeaderboard'
-import { getNextEvent, getNextEventFromApi, getLastEventForPublic } from '@/lib/services/meetings'
+import { getNextEvent, getNextEventFromApi, getLastEventForPublic, canMakePrediction } from '@/lib/services/meetings'
 import { getQualifyingForMeeting } from '@/lib/services/sessions'
 import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
 import { getPointsForPrediction } from '@/lib/services/scoring'
 import PreviousRaceCard from '@/components/PreviousRaceCard'
+import HomeHero from '@/components/HomeHero'
 
 export const metadata: Metadata = {
   title: "Home",
@@ -79,6 +80,20 @@ export default async function HomePage() {
     )
   }
 
+  // When logged in: prediction availability and existing prediction for next race (hero button + modal)
+  let nextEventPredictionAvailability: { canPredict: boolean; reason?: string } = { canPredict: false, reason: 'No upcoming race' }
+  let nextEventHasPrediction = false
+  if (user && nextEvent) {
+    nextEventPredictionAvailability = await canMakePrediction(nextEvent.session, nextEvent.meeting.meeting_key)
+    const { data: nextPred } = await supabase
+      .from('predictions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('race_id', nextEvent.meeting.id)
+      .single()
+    nextEventHasPrediction = !!nextPred
+  }
+
   // When logged in: check if user has a prediction for the last race and get points
   let previousPrediction: Prediction | null = null
   let previousPoints: number | null = null
@@ -107,38 +122,13 @@ export default async function HomePage() {
       <Nav />
       <main>
           {nextEvent ? (
-            <div className="hero relative min-h-75 sm:min-h-112 md:min-h-128 w-full flex flex-col justify-start items-center pb-0 sm:pb-12 pt-8 sm:pt-12 md:pt-16">
-              {nextEvent.meeting.circuit_image && (
-                <div className="absolute inset-0 flex justify-center items-center pointer-events-none overflow-hidden">
-                  <div className="relative w-full h-full min-h-96 sm:min-h-112 md:min-h-128 scale-110 sm:scale-125">
-                    <Image
-                      src={nextEvent.meeting.circuit_image}
-                      alt="Circuit Image {nextEvent.meeting.circuit_short_name}"
-                      fill
-                      className="object-contain opacity-10 rotate-355"
-                      unoptimized
-                    />
-                  </div>
-                </div>
-              )}
-              <div className="relative z-10 space-y-3 sm:space-y-4 text-center mt-8 sm:mt-12 md:mt-16 px-4">
-                <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl text-white">
-                    {nextEvent.meeting.meeting_name.split(' ').slice(0, -2).join(' ')}{' '}
-                    <b>{nextEvent.meeting.meeting_name.split(' ').slice(-2).join(' ')}</b>
-                </h2>
-                <p className="text-xl sm:text-2xl md:text-3xl text-white opacity-70">
-                  {getDaysToGo(nextEvent.session.date_start)} days to go
-                </p>
-              </div>
-              <div className="relative z-10 mt-8 sm:mt-10 md:mt-12 flex justify-center">
-                <Link
-                  href="/prediction/race"
-                  className="px-5 py-2 sm:px-6 rounded-full font-medium transition-colors border-2 sm:border-4 border-f1-red text-white cursor-pointer text-center text-sm sm:text-base"
-                >
-                  <b>Enter</b> your prediction
-                </Link>
-              </div>
-            </div>
+            <HomeHero
+              nextEvent={nextEvent}
+              isLoggedIn={!!user}
+              predictionAvailability={nextEventPredictionAvailability}
+              hasPrediction={nextEventHasPrediction}
+              daysToGo={getDaysToGo(nextEvent.session.date_start)}
+            />
           ) : null}
 
           <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto px-6 py-16">
