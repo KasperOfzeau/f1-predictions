@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import type { Prediction } from '@/lib/types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   getLastRaceOrSprintForMeeting,
   getNextRaceOrSprintForMeeting,
@@ -20,12 +21,14 @@ export interface PredictionWithMeta {
 
 /**
  * Fetch the last N predictions for a user with meeting info and session key for result/drivers.
+ * Pass a client (e.g. admin) when the caller is unauthenticated so RLS does not block reading other users' predictions.
  */
 export async function getRecentPredictionsForUser(
   userId: string,
-  limit = 5
+  limit = 5,
+  client?: SupabaseClient
 ): Promise<PredictionWithMeta[]> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const now = new Date().toISOString()
 
   const { data: rows, error } = await supabase

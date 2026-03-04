@@ -15,8 +15,8 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params
-  const supabase = await createClient()
-  const { data: profile } = await supabase
+  const admin = createAdminClient()
+  const { data: profile } = await admin
     .from('profiles')
     .select('username, full_name')
     .eq('username', username.toLowerCase())
@@ -30,10 +30,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProfileByUsernamePage({ params }: PageProps) {
   const { username: usernameParam } = await params
   const supabase = await createClient()
+  const admin = createAdminClient()
 
   const { data: { user: currentUser } } = await supabase.auth.getUser()
 
-  const { data: profile, error } = await supabase
+  // Use admin so profile is readable for unauthenticated visitors (RLS may block anon)
+  const { data: profile, error } = await admin
     .from('profiles')
     .select('id, username, avatar_url, full_name')
     .eq('username', usernameParam.toLowerCase())
@@ -47,13 +49,13 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
 
   const displayLetter = profile.username?.charAt(0)?.toUpperCase() || '?'
 
-  const recentPredictions = await getRecentPredictionsForUser(profile.id, 5)
+  // Use admin so predictions are readable for unauthenticated visitors
+  const recentPredictions = await getRecentPredictionsForUser(profile.id, 5, admin)
 
   const currentSeasonYear = new Date().getMonth() === 0
     ? new Date().getFullYear() - 1
     : new Date().getFullYear()
   // Use admin client so we can read any user's season prediction (RLS only allows own rows with anon).
-  const admin = createAdminClient()
   const { data: seasonPrediction } = await admin
     .from('season_predictions')
     .select('*')
