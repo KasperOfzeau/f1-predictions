@@ -5,12 +5,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 import GlobalLeaderboard from '@/components/GlobalLeaderboard'
-import { getNextEvent, getNextEventFromApi, getLastEventForPublic, canMakePrediction } from '@/lib/services/meetings'
+import { getNextEvent, getNextEventFromApi, getLastEventForPublic, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
 import { getQualifyingForMeeting } from '@/lib/services/sessions'
 import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
 import { getPointsForPrediction } from '@/lib/services/scoring'
 import PreviousRaceCard from '@/components/PreviousRaceCard'
 import HomeHero from '@/components/HomeHero'
+import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
 
 export const metadata: Metadata = {
   title: "Home",
@@ -117,6 +118,9 @@ export default async function HomePage() {
     qualifyingSessionKey = qualifyingSession?.session_key ?? null
   }
 
+  // Season predictions block: alleen tonen voor ingelogde gebruikers vóór eerste raceweekend
+  const showSeasonPredictionsBlock = user ? await isBeforeFirstRaceWeekend() : false
+
   return (
     <div className="min-h-112 sm:min-h-128 md:min-h-144 bg-carbon-black">
       <Nav />
@@ -131,7 +135,13 @@ export default async function HomePage() {
             />
           ) : null}
 
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto px-6 py-16">
+          {showSeasonPredictionsBlock && (
+            <section className="max-w-7xl mx-auto px-6 pt-8 pb-4">
+              <SeasonPredictionsBlock show={true} />
+            </section>
+          )}
+
+          <section className={`grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto px-6 ${showSeasonPredictionsBlock ? 'pt-6 pb-16' : 'py-16'}`}>
             <div className="bg-white/5 rounded-xl border border-white/10 p-6">
               <h3 className="text-2xl font-semibold text-white mb-4">My pools</h3>
               {user ? (

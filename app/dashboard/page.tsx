@@ -4,9 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '../../components/LogoutButton'
 import Nav from '../../components/Nav'
 import NextRaceCard from '../../components/NextRaceCard'
-import { getNextEvent, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
+import { getNextEvent, canMakePrediction } from '@/lib/services/meetings'
 import Link from 'next/link'
-import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -80,9 +79,6 @@ export default async function DashboardPage() {
 
     existingPrediction = data
   }
-
-  // Display season predictions block only before first race weekend of the year
-  const showSeasonPredictionsBlock = await isBeforeFirstRaceWeekend()
 
   return (
     <div className="min-h-screen bg-carbon-black">
@@ -178,9 +174,6 @@ export default async function DashboardPage() {
                   </div>
                 )}
               </div>
-
-              {/* Seizoensvoorspellingen – alleen vóór eerste raceweekend */}
-              <SeasonPredictionsBlock show={showSeasonPredictionsBlock} />
 
             </div>
           </div>

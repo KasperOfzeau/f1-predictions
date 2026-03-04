@@ -100,15 +100,15 @@ export default function SeasonPredictionsBlock({ show }: SeasonPredictionsBlockP
 
   return (
     <>
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-xl font-bold text-carbon-black mb-2">Season predictions ({getCurrentSeasonYear()})</h3>
-        <p className="text-gray-600 text-sm mb-4">
-          Make your predictions for the season before the first race weekend starts.
+      <div className="bg-white/5 rounded-xl border border-white/10 p-6">
+        <h3 className="text-2xl font-semibold text-white mb-2">Season prediction ({getCurrentSeasonYear()})</h3>
+        <p className="text-white/70 text-sm mb-4">
+          Make your prediction for the season before the first race weekend starts.
         </p>
         <button
           type="button"
           onClick={() => setPopupOpen(true)}
-          className="bg-f1-red hover:bg-f1-red-hover text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          className="border-2 border-f1-red text-white px-4 py-2 rounded-full text-sm font-medium transition-colors hover:bg-f1-red/20"
         >
           {hasExistingPrediction ? 'Edit season prediction' : 'Make season predictions'}
         </button>
