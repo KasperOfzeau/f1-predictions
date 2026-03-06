@@ -205,6 +205,11 @@ async function ensureMeetingsSynced(
   return true
 }
 
+/**
+ * Next meeting = meeting whose weekend is not over yet (date_end >= now).
+ * This way we still show the current weekend (e.g. Australia) when we're
+ * between date_start and date_end, instead of jumping to the next GP.
+ */
 async function getNextUpcomingMeeting(
   supabase: Awaited<ReturnType<typeof createClient>>,
   year: number,
@@ -214,7 +219,7 @@ async function getNextUpcomingMeeting(
     .from('meetings')
     .select('*')
     .eq('year', year)
-    .gte('date_start', now)
+    .gte('date_end', now)
     .order('date_start', { ascending: true })
     .limit(1)
     .single()
