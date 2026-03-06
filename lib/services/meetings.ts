@@ -34,8 +34,9 @@ export async function getNextEventFromApi(): Promise<NextEvent | null> {
   const grandPrix = apiMeetings.filter((m: { meeting_name: string }) =>
     m.meeting_name.includes('Grand Prix')
   )
+  // Weekend not over yet (date_end >= now), then first by date_start (current or next GP)
   const nextMeetingApi = grandPrix
-    .filter((m: { date_start: string }) => m.date_start >= now)
+    .filter((m: { date_end: string }) => m.date_end >= now)
     .sort((a: { date_start: string }, b: { date_start: string }) =>
       a.date_start.localeCompare(b.date_start)
     )[0]
