@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 
+const supabase = createClient()
+
 interface Member {
   id: string
   user_id: string
@@ -32,9 +34,8 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
-  const handleRemoveMember = async (memberId: string, userId: string) => {
+  const handleRemoveMember = async (memberId: string) => {
     if (!confirm('Are you sure you want to remove this member from the pool?')) {
       return
     }
@@ -93,7 +94,6 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
                       alt={member.profiles.username}
                       fill
                       className="object-cover"
-                      unoptimized
                       sizes="40px"
                     />
                   ) : (
@@ -125,7 +125,7 @@ export default function PoolMembersList({ members, isAdmin, poolId, currentUserI
               <div className="flex items-center gap-2 shrink-0">
                 {canRemove && (
                   <button
-                    onClick={() => handleRemoveMember(member.id, member.user_id)}
+                    onClick={() => handleRemoveMember(member.id)}
                     disabled={removingId === member.id}
                     title="Remove member from pool"
                     className="text-xs px-2 py-1 rounded border border-gray-200 text-gray-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50 disabled:pointer-events-none sm:mr-4 mr-2"

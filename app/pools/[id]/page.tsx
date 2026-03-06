@@ -1,22 +1,26 @@
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
 import InviteUserButton from '@/components/InviteUserButton'
 import PoolMembersList from '@/components/PoolMembersList'
 import DeletePoolButton from '@/components/DeletePoolButton'
 import Nav from '@/components/Nav'
 import { getOrComputeSeasonPointsForUsers } from '@/lib/services/seasonScores'
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params
+const getPoolById = cache(async (id: string) => {
   const supabase = await createClient()
-
   const { data: pool } = await supabase
     .from('pools')
-    .select('name')
+    .select('*')
     .eq('id', id)
     .single()
+  return pool
+})
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const pool = await getPoolById(id)
 
   return {
     title: pool?.name || 'Pool Details',
@@ -26,30 +30,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function PoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const [{ data: { user }, error: userError }, pool] = await Promise.all([
+    supabase.auth.getUser(),
+    getPoolById(id),
+  ])
 
   if (userError || !user) {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    redirect('/login')
-  }
-
-  // Fetch pool
-  const { data: pool, error: poolError } = await supabase
-    .from('pools')
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (poolError || !pool) {
+  if (!pool) {
     notFound()
   }
 

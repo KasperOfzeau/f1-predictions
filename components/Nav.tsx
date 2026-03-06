@@ -1,9 +1,11 @@
-'use client'
+ 'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
+
+const supabase = createClient()
 
 export default function Nav() {
   const [username, setUsername] = useState<string | null>(null)
@@ -11,8 +13,6 @@ export default function Nav() {
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
-    const supabase = createClient()
-
     const loadUserAndNotifications = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -96,7 +96,6 @@ export default function Nav() {
                       alt="Profile"
                       fill
                       className="object-cover"
-                      unoptimized
                       sizes="32px"
                     />
                   ) : (

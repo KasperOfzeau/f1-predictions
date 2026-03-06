@@ -13,12 +13,11 @@ import {
 // -----------------------------------------------------------------------------
 
 const F1_API_URL = 'https://api.openf1.org/v1'
+const OPENF1_FETCH_OPTIONS = { next: { revalidate: 60 } } as const
 
 // -----------------------------------------------------------------------------
 // Next event & meetings (public API)
 // -----------------------------------------------------------------------------
-
-const RACE_OR_SPRINT_NAMES = ['Race', 'Sprint'] as const
 
 /**
  * Get the next race/sprint event from the Open F1 API only (no DB).
@@ -28,7 +27,7 @@ export async function getNextEventFromApi(): Promise<NextEvent | null> {
   const currentYear = new Date().getFullYear()
   const now = new Date().toISOString()
 
-  const res = await fetch(`${F1_API_URL}/meetings?year=${currentYear}`)
+  const res = await fetch(`${F1_API_URL}/meetings?year=${currentYear}`, OPENF1_FETCH_OPTIONS)
   if (!res.ok) return null
   const apiMeetings = await res.json()
   const grandPrix = apiMeetings.filter((m: { meeting_name: string }) =>
@@ -43,7 +42,8 @@ export async function getNextEventFromApi(): Promise<NextEvent | null> {
   if (!nextMeetingApi) return null
 
   const sessionsRes = await fetch(
-    `${F1_API_URL}/sessions?meeting_key=${nextMeetingApi.meeting_key}`
+    `${F1_API_URL}/sessions?meeting_key=${nextMeetingApi.meeting_key}`,
+    OPENF1_FETCH_OPTIONS
   )
   if (!sessionsRes.ok) return null
   const sessions = await sessionsRes.json()
@@ -130,8 +130,8 @@ export async function getLastEventFromApi(): Promise<NextEvent | null> {
   const now = new Date().toISOString()
 
   const [resCurrent, resPrevious] = await Promise.all([
-    fetch(`${F1_API_URL}/meetings?year=${currentYear}`),
-    fetch(`${F1_API_URL}/meetings?year=${currentYear - 1}`),
+    fetch(`${F1_API_URL}/meetings?year=${currentYear}`, OPENF1_FETCH_OPTIONS),
+    fetch(`${F1_API_URL}/meetings?year=${currentYear - 1}`, OPENF1_FETCH_OPTIONS),
   ])
 
   const parseMeetings = async (res: Response): Promise<ApiMeeting[]> => {
@@ -160,7 +160,8 @@ export async function getLastEventFromApi(): Promise<NextEvent | null> {
   if (!lastMeetingApi) return null
 
   const sessionsRes = await fetch(
-    `${F1_API_URL}/sessions?meeting_key=${lastMeetingApi.meeting_key}`
+    `${F1_API_URL}/sessions?meeting_key=${lastMeetingApi.meeting_key}`,
+    OPENF1_FETCH_OPTIONS
   )
   if (!sessionsRes.ok) return null
 
@@ -372,7 +373,8 @@ export async function canMakePrediction(
   }
 
   const res = await fetch(
-    `${F1_API_URL}/starting_grid?session_key=${qualifyingSession.session_key}&position<=1`
+    `${F1_API_URL}/starting_grid?session_key=${qualifyingSession.session_key}&position<=1`,
+    OPENF1_FETCH_OPTIONS
   )
   if (!res.ok) return { canPredict: false, reason: 'Grid data not available' }
 
@@ -479,7 +481,7 @@ async function syncAllMeetings(
   supabase: Awaited<ReturnType<typeof createClient>>,
   year: number
 ): Promise<void> {
-  const res = await fetch(`${F1_API_URL}/meetings?year=${year}`)
+  const res = await fetch(`${F1_API_URL}/meetings?year=${year}`, OPENF1_FETCH_OPTIONS)
   if (!res.ok) throw new Error(`Meetings API request failed: ${res.statusText}`)
 
   const apiMeetings = await res.json()

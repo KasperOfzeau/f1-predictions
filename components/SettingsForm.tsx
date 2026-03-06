@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
-import imageCompression from 'browser-image-compression'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
@@ -18,6 +17,8 @@ const AVATAR_COMPRESSION_OPTIONS = {
   useWebWorker: true,
   fileType: 'image/jpeg' as const, // JPEG for best compression (no transparency needed)
 }
+
+const supabase = createClient()
 
 interface Profile {
   id: string
@@ -43,7 +44,6 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
   const [success, setSuccess] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -116,8 +116,9 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
 
     let fileToUpload: File
     try {
+      const imageCompression = (await import('browser-image-compression')).default
       fileToUpload = await imageCompression(file, AVATAR_COMPRESSION_OPTIONS)
-    } catch (err) {
+    } catch {
       setUploadingAvatar(false)
       e.target.value = ''
       setError('Could not resize image. Try a different photo.')
@@ -181,7 +182,6 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
                 alt="Profile"
                 fill
                 className="object-cover"
-                unoptimized
                 sizes="80px"
               />
             ) : (
@@ -274,7 +274,7 @@ export default function SettingsForm({ user, profile }: SettingsFormProps) {
         </button>
         <button
           type="button"
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.push('/profile')}
           className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
         >
           Cancel

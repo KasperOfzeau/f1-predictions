@@ -52,14 +52,13 @@ export default function DriverDropdown({
         {selectedDriver ? (
           <>
             {/* Selected Driver Avatar */}
-            <div className="w-8 h-8 relative rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+            <div className="w-8 h-8 relative rounded-full overflow-hidden border border-gray-200 shrink-0">
               {selectedDriver.headshot_url ? (
                 <Image
                   src={selectedDriver.headshot_url}
                   alt={selectedDriver.full_name}
                   fill
                   className="object-cover"
-                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
@@ -69,7 +68,7 @@ export default function DriverDropdown({
             </div>
             {/* Team Color Indicator */}
             <div
-              className="w-3 h-3 rounded-full flex-shrink-0"
+              className="w-3 h-3 rounded-full shrink-0"
               style={{ backgroundColor: `#${selectedDriver.team_colour}` }}
             />
             {/* Driver Info */}
@@ -127,14 +126,13 @@ export default function DriverDropdown({
                 } ${selectedDriverId === driver.driver_number ? 'bg-red-50' : ''}`}
               >
                 {/* Driver Avatar */}
-                <div className="w-8 h-8 relative rounded-full overflow-hidden border border-gray-200 flex-shrink-0">
+                <div className="w-8 h-8 relative rounded-full overflow-hidden border border-gray-200 shrink-0">
                   {driver.headshot_url ? (
                     <Image
                       src={driver.headshot_url}
                       alt={driver.full_name}
                       fill
                       className="object-cover"
-                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
@@ -145,7 +143,7 @@ export default function DriverDropdown({
 
                 {/* Team Color Indicator */}
                 <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  className="w-3 h-3 rounded-full shrink-0"
                   style={{ backgroundColor: `#${driver.team_colour}` }}
                 />
 

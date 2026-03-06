@@ -33,7 +33,6 @@ export default function GlobalLeaderboard({ entries }: GlobalLeaderboardProps) {
                     alt={entry.username}
                     fill
                     className="object-cover"
-                    unoptimized
                     sizes="48px"
                   />
                 ) : (

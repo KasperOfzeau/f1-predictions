@@ -16,16 +16,6 @@ export default async function InvitesPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    redirect('/login')
-  }
-
   // Fetch pending invites with nested select
   const { data: invites, error: invitesError } = await supabase
     .from('invites')
@@ -50,9 +40,6 @@ export default async function InvitesPage() {
     .eq('to_user_id', user.id)
     .eq('status', 'pending')
     .order('created_at', { ascending: false })
-
-  console.log('Invites:', invites)
-  console.log('Invites Error:', invitesError)
 
   // Normalize: Supabase returns nested relations as arrays; InvitesList expects single objects
   const normalizedInvites = invites?.map((inv) => ({

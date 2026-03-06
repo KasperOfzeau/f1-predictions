@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CreatePoolForm from '@/components/CreatePoolForm'
 import Nav from '@/components/Nav'
-import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: "Create Pool",
@@ -17,14 +16,15 @@ export default async function CreatePoolPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single()
-    if (error || !profile) {
-      redirect('/login')
-    }
+
+  if (profileError || !profile) {
+    redirect('/login')
+  }
 
   return (
     <div className="min-h-screen bg-carbon-black">

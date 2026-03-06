@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Notification } from '@/lib/types'
 
+const supabase = createClient()
+
 interface NotificationsListProps {
   notifications: Notification[]
 }
@@ -13,7 +15,6 @@ interface NotificationsListProps {
 export default function NotificationsList({ notifications }: NotificationsListProps) {
   const [dismissing, setDismissing] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleMarkAsRead = async (notificationId: string) => {
     await supabase

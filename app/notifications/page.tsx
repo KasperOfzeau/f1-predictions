@@ -16,16 +16,6 @@ export default async function NotificationsPage() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    redirect('/login')
-  }
-
   // Fetch all notifications (unread first)
   const { data: notifications } = await supabase
     .from('notifications')
@@ -47,7 +37,7 @@ export default async function NotificationsPage() {
               <div className="text-6xl mb-4">🔔</div>
               <p className="text-gray-600 mb-2">No notifications yet</p>
               <p className="text-sm text-gray-500">
-                You'll be notified about pool invites, race reminders, and updates.
+                You&apos;ll be notified about pool invites, race reminders, and updates.
               </p>
             </div>
           ) : (

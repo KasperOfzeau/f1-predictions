@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import type { Prediction } from '@/lib/types'
+import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import Image from 'next/image'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 import GlobalLeaderboard from '@/components/GlobalLeaderboard'
@@ -12,6 +12,14 @@ import { getPointsForPrediction } from '@/lib/services/scoring'
 import PreviousRaceCard from '@/components/PreviousRaceCard'
 import HomeHero from '@/components/HomeHero'
 import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
+
+type PoolInfo = { id: string; name: string; description: string | null; created_at: string }
+type PoolMembership = {
+  id: string
+  role: string
+  joined_at: string
+  pools: PoolInfo | PoolInfo[] | null
+}
 
 export const metadata: Metadata = {
   title: "The Prediction Paddock",
@@ -27,27 +35,47 @@ function getDaysToGo(dateStart: string): number {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
 }
 
+const getCachedNextEventFromApi = unstable_cache(
+  async () => getNextEventFromApi(),
+  ['home-next-event-api'],
+  { revalidate: 60 }
+)
+
+const getCachedLastEventForPublic = unstable_cache(
+  async () => getLastEventForPublic(),
+  ['home-last-event-public'],
+  { revalidate: 60 }
+)
+
+const getCachedGlobalLeaderboard = unstable_cache(
+  async (limit: number) => getGlobalLeaderboard(limit),
+  ['global-leaderboard'],
+  { revalidate: 60 }
+)
+
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  // When not logged in, use API only to avoid RLS on meetings/sessions (no DB sync).
-  const nextEvent = user ? await getNextEvent() : await getNextEventFromApi()
-  const lastEvent = await getLastEventForPublic()
 
-  // Global leaderboard (top 5). Uses admin client so it works on public home too.
-  let leaderboard: Awaited<ReturnType<typeof getGlobalLeaderboard>> = []
-  try {
-    leaderboard = await getGlobalLeaderboard(5)
-  } catch (e) {
+  // Fetch independent, read-heavy data in parallel.
+  const nextEventPromise = user ? getNextEvent() : getCachedNextEventFromApi()
+  const lastEventPromise = getCachedLastEventForPublic()
+  const leaderboardPromise = getCachedGlobalLeaderboard(5).catch((e) => {
     console.error('Global leaderboard:', e)
-  }
+    return []
+  })
+  const [nextEvent, lastEvent, leaderboard] = await Promise.all([
+    nextEventPromise,
+    lastEventPromise,
+    leaderboardPromise,
+  ])
 
   // Fetch user's pools with member count (only when logged in)
   let poolsWithMemberCount: Array<{
     id: string
     role: string
     joined_at: string
-    pools: { id: string; name: string; description: string | null; created_at: string }
+    pools: PoolInfo
     memberCount: number
   }> = []
   if (user) {
@@ -67,31 +95,46 @@ export default async function HomePage() {
       .eq('user_id', user.id)
       .order('joined_at', { ascending: false })
 
-    poolsWithMemberCount = await Promise.all(
-      (poolMemberships || []).map(async (membership: any) => {
-        const { count } = await supabase
-          .from('pool_members')
-          .select('*', { count: 'exact', head: true })
-          .eq('pool_id', membership.pools.id)
-        return {
-          ...membership,
-          memberCount: count ?? 0,
-        }
-      })
-    )
+    const normalizedMemberships = ((poolMemberships || []) as PoolMembership[])
+      .map((membership) => ({
+        ...membership,
+        pools: Array.isArray(membership.pools) ? membership.pools[0] : membership.pools,
+      }))
+      .filter((membership): membership is Omit<PoolMembership, 'pools'> & { pools: PoolInfo } => !!membership.pools?.id)
+
+    const poolIds = normalizedMemberships.map((membership) => membership.pools.id)
+    const { data: poolMembers } = poolIds.length > 0
+      ? await supabase
+        .from('pool_members')
+        .select('pool_id')
+        .in('pool_id', poolIds)
+      : { data: [] as Array<{ pool_id: string }> }
+
+    const memberCountByPoolId = (poolMembers || []).reduce<Record<string, number>>((acc, row) => {
+      acc[row.pool_id] = (acc[row.pool_id] ?? 0) + 1
+      return acc
+    }, {})
+
+    poolsWithMemberCount = normalizedMemberships.map((membership) => ({
+      ...membership,
+      memberCount: memberCountByPoolId[membership.pools.id] ?? 0,
+    }))
   }
 
   // When logged in: prediction availability and existing prediction for next race (hero button + modal)
   let nextEventPredictionAvailability: { canPredict: boolean; reason?: string } = { canPredict: false, reason: 'No upcoming race' }
   let nextEventHasPrediction = false
   if (user && nextEvent) {
-    nextEventPredictionAvailability = await canMakePrediction(nextEvent.session, nextEvent.meeting.meeting_key)
-    const { data: nextPred } = await supabase
-      .from('predictions')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('race_id', nextEvent.meeting.id)
-      .single()
+    const [predictionAvailability, { data: nextPred }] = await Promise.all([
+      canMakePrediction(nextEvent.session, nextEvent.meeting.meeting_key),
+      supabase
+        .from('predictions')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('race_id', nextEvent.meeting.id)
+        .single(),
+    ])
+    nextEventPredictionAvailability = predictionAvailability
     nextEventHasPrediction = !!nextPred
   }
 
@@ -119,6 +162,7 @@ export default async function HomePage() {
   }
 
   // Season predictions block: alleen tonen voor ingelogde gebruikers vóór eerste raceweekend
+  // Not cached: isBeforeFirstRaceWeekend uses Supabase server client (cookies)
   const showSeasonPredictionsBlock = user ? await isBeforeFirstRaceWeekend() : false
 
   return (

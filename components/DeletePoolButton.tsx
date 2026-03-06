@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Modal from './Modal'
 
+const supabase = createClient()
+
 interface DeletePoolButtonProps {
   poolId: string
   poolName: string
@@ -15,7 +17,6 @@ export default function DeletePoolButton({ poolId, poolName }: DeletePoolButtonP
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleDelete = async () => {
     setLoading(true)

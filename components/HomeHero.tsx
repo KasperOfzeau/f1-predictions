@@ -3,10 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import type { NextEvent } from '@/lib/types'
-import type { PredictionAvailability } from '@/lib/types'
-import PredictionModal from './PredictionModal'
+import type { NextEvent, PredictionAvailability } from '@/lib/types'
+
+const PredictionModal = dynamic(() => import('./PredictionModal'), {
+  ssr: false,
+})
 
 interface HomeHeroProps {
   nextEvent: NextEvent
@@ -37,7 +40,6 @@ export default function HomeHero({
               alt={`Circuit ${meeting.circuit_short_name}`}
               fill
               className="object-contain opacity-10 rotate-355"
-              unoptimized
             />
           </div>
         </div>

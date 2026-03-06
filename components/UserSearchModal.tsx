@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
-import Link from 'next/link'
 import Modal from './Modal'
+
+const supabase = createClient()
 
 interface UserSearchModalProps {
   isOpen: boolean
@@ -26,11 +27,11 @@ export default function UserSearchModal({
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Profile[]>([])
   const [searching, setSearching] = useState(false)
-  const supabase = createClient()
+  const hasSearchQuery = searchQuery.length >= 2
+  const visibleResults = hasSearchQuery ? searchResults : []
 
   useEffect(() => {
-    if (searchQuery.length < 2) {
-      setSearchResults([])
+    if (!hasSearchQuery) {
       return
     }
 
@@ -48,7 +49,7 @@ export default function UserSearchModal({
     }, 500)
 
     return () => clearTimeout(search)
-  }, [searchQuery])
+  }, [hasSearchQuery, searchQuery])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Invite users" size="md">
@@ -79,11 +80,11 @@ export default function UserSearchModal({
           <p className="text-center text-gray-500 py-4">Searching...</p>
         )}
 
-        {!searching && searchQuery.length >= 2 && searchResults.length === 0 && (
+        {!searching && hasSearchQuery && visibleResults.length === 0 && (
           <p className="text-center text-gray-500 py-4">No users found</p>
         )}
 
-        {searchResults.map((user) => (
+        {visibleResults.map((user) => (
           <div
             key={user.id}
             className="flex justify-between items-center p-3 hover:bg-gray-50 rounded"

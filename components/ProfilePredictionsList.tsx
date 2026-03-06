@@ -1,10 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import type { PredictionWithMeta } from '@/lib/services/profilePredictions'
 import type { SeasonPrediction } from '@/lib/types'
-import PreviousRaceResultModal from './PreviousRaceResultModal'
-import SeasonPredictionViewModal from './SeasonPredictionViewModal'
+
+const PreviousRaceResultModal = dynamic(() => import('./PreviousRaceResultModal'), {
+  ssr: false,
+})
+
+const SeasonPredictionViewModal = dynamic(() => import('./SeasonPredictionViewModal'), {
+  ssr: false,
+})
 
 interface ProfilePredictionsListProps {
   items: PredictionWithMeta[]

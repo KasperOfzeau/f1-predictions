@@ -3,9 +3,10 @@
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+const supabase = createClient()
+
 export default function LogoutButton() {
   const router = useRouter()
-  const supabase = createClient()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

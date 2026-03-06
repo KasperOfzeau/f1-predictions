@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -13,14 +14,19 @@ interface PageProps {
   params: Promise<{ username: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { username } = await params
+const getProfileByUsername = cache(async (username: string) => {
   const admin = createAdminClient()
   const { data: profile } = await admin
     .from('profiles')
-    .select('username, full_name')
+    .select('id, username, avatar_url, full_name')
     .eq('username', username.toLowerCase())
     .single()
+  return profile
+})
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { username } = await params
+  const profile = await getProfileByUsername(username)
   const displayName = profile?.username ? `@${profile.username}` : undefined
   return {
     title: profile ? `${displayName} | Profile` : 'Profile',
@@ -30,27 +36,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProfileByUsernamePage({ params }: PageProps) {
   const { username: usernameParam } = await params
   const supabase = await createClient()
-  const admin = createAdminClient()
 
   const { data: { user: currentUser } } = await supabase.auth.getUser()
 
-  // Use admin so profile is readable for unauthenticated visitors (RLS may block anon)
-  const { data: profile, error } = await admin
-    .from('profiles')
-    .select('id, username, avatar_url, full_name')
-    .eq('username', usernameParam.toLowerCase())
-    .single()
-
-  if (error || !profile) {
+  const profile = await getProfileByUsername(usernameParam)
+  if (!profile) {
     notFound()
   }
 
   const isOwnProfile = !!currentUser && currentUser.id === profile.id
 
   const displayLetter = profile.username?.charAt(0)?.toUpperCase() || '?'
-
-  // Use admin so predictions are readable for unauthenticated visitors
-  const recentPredictions = await getRecentPredictionsForUser(profile.id, 5, admin)
 
   const currentSeasonYear = new Date().getMonth() === 0
     ? new Date().getFullYear() - 1
@@ -63,12 +59,16 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
     )
   }
   const clientForSeason = adminOptional ?? supabase
-  const { data: seasonPrediction } = await clientForSeason
-    .from('season_predictions')
-    .select('*')
-    .eq('user_id', profile.id)
-    .eq('season_year', currentSeasonYear)
-    .maybeSingle()   
+  const [recentPredictions, { data: seasonPrediction }] = await Promise.all([
+    // Use admin so predictions are readable for unauthenticated visitors.
+    getRecentPredictionsForUser(profile.id, 5, createAdminClient()),
+    clientForSeason
+      .from('season_predictions')
+      .select('*')
+      .eq('user_id', profile.id)
+      .eq('season_year', currentSeasonYear)
+      .maybeSingle(),
+  ])
 
   return (
     <div className="min-h-screen bg-carbon-black">
@@ -87,7 +87,6 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
                       alt={profile.username ? `@${profile.username}` : 'Profile'}
                       fill
                       className="object-cover"
-                      unoptimized
                       sizes="96px"
                     />
                   ) : (

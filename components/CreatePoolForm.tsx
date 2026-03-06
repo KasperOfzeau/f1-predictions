@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+const supabase = createClient()
+
 export default function CreatePoolForm() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,7 +71,7 @@ export default function CreatePoolForm() {
           maxLength={50}
         />
         <p className="mt-1 text-xs text-gray-500">
-          e.g., GP2 Engine support group, No Michael No That's So Not Right, DTS Believers Anonymous
+          e.g., GP2 Engine support group, No Michael No That&apos;s So Not Right, DTS Believers Anonymous
         </p>
       </div>
 

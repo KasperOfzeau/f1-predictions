@@ -2,8 +2,12 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import type { NextEvent, Prediction } from '@/lib/types'
-import PreviousRaceResultModal from './PreviousRaceResultModal'
+
+const PreviousRaceResultModal = dynamic(() => import('./PreviousRaceResultModal'), {
+  ssr: false,
+})
 
 function getCircuitImageSrc(circuitShortName: string): string {
   const base = circuitShortName.replace(/\s+/g, '-')

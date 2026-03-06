@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+const supabase = createClient()
+
 interface Invite {
   id: string
   pool_id: string
@@ -31,7 +33,6 @@ export default function InvitesList({ invites }: InvitesListProps) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const handleAccept = async (invite: Invite) => {
     setLoading(invite.id)

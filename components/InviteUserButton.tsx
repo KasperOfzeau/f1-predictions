@@ -2,7 +2,12 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import UserSearchModal from './UserSearchModal'
+import dynamic from 'next/dynamic'
+
+const UserSearchModal = dynamic(() => import('./UserSearchModal'), {
+  ssr: false,
+})
+const supabase = createClient()
 
 interface InviteUserButtonProps {
   poolId: string
@@ -13,7 +18,6 @@ export default function InviteUserButton({ poolId }: InviteUserButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const supabase = createClient()
 
   const handleInvite = async (userId: string) => {
     setLoading(true)

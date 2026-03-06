@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { Driver } from '@/lib/types'
 
 const F1_API_URL = 'https://api.openf1.org/v1'
+export const revalidate = 60
 
 /**
  * GET /api/drivers?session_key=7782
@@ -19,7 +20,9 @@ export async function GET(request: NextRequest) {
   const key = parseInt(sessionKey, 10)
 
   try {
-    const res = await fetch(`${F1_API_URL}/drivers?session_key=${key}`)
+    const res = await fetch(`${F1_API_URL}/drivers?session_key=${key}`, {
+      next: { revalidate },
+    })
     if (!res.ok) {
       return NextResponse.json(
         { error: 'Could not fetch drivers' },

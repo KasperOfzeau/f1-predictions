@@ -6,6 +6,7 @@ import type { Session } from '@/lib/types'
 // -----------------------------------------------------------------------------
 
 const F1_API_URL = 'https://api.openf1.org/v1'
+const OPENF1_FETCH_OPTIONS = { next: { revalidate: 60 } } as const
 
 const RACE_OR_SPRINT_NAMES = ['Race', 'Sprint'] as const
 const RELEVANT_SESSION_NAMES = ['Race', 'Sprint', 'Qualifying', 'Sprint Qualifying'] as const
@@ -119,7 +120,7 @@ export async function syncSessionsForMeeting(
   supabase: Awaited<ReturnType<typeof createClient>>,
   meetingKey: number
 ): Promise<void> {
-  const res = await fetch(`${F1_API_URL}/sessions?meeting_key=${meetingKey}`)
+  const res = await fetch(`${F1_API_URL}/sessions?meeting_key=${meetingKey}`, OPENF1_FETCH_OPTIONS)
   if (!res.ok) throw new Error(`Sessions API request failed: ${res.statusText}`)
 
   const sessions = await res.json()
