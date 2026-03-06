@@ -1,20 +1,19 @@
 'use client'
 
 import { Suspense, useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
+import { loginWithEmailOrUsername } from '@/lib/actions/auth'
 
 function LoginForm() {
-  const [email, setEmail] = useState('')
+  const [emailOrUsername, setEmailOrUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showConfirmMessage, setShowConfirmMessage] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClient()
 
   useEffect(() => {
     if (searchParams.get('registered') === '1') {
@@ -29,15 +28,12 @@ function LoginForm() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error } = await loginWithEmailOrUsername(emailOrUsername, password)
 
     setLoading(false)
 
     if (error) {
-      setError(error.message)
+      setError(error)
       return
     }
 
@@ -74,19 +70,19 @@ function LoginForm() {
 
         <div className="rounded-md shadow-sm -space-y-px">
           <div>
-            <label htmlFor="email-address" className="sr-only">
-              Email address
+            <label htmlFor="email-or-username" className="sr-only">
+              Email or username
             </label>
             <input
-              id="email-address"
-              name="email"
-              type="email"
-              autoComplete="email"
+              id="email-or-username"
+              name="emailOrUsername"
+              type="text"
+              autoComplete="username email"
               required
               className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-f1-red focus:border-f1-red focus:z-10 sm:text-sm"
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email or username"
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
             />
           </div>
           <div>
