@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { getAdminClientIfAvailable } from '@/lib/supabase/admin'
+import { createAdminClient, getAdminClientIfAvailable } from '@/lib/supabase/admin'
 import Nav from '@/components/Nav'
 import LogoutButton from '@/components/LogoutButton'
 import { getRecentPredictionsForUser } from '@/lib/services/profilePredictions'
@@ -56,13 +56,13 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
     ? new Date().getFullYear() - 1
     : new Date().getFullYear()
   // Use admin client when available so we can read any user's season prediction (RLS blocks with anon).
-  const admin = getAdminClientIfAvailable()
-  if (!isOwnProfile && !admin) {
+  const adminOptional = getAdminClientIfAvailable()
+  if (!isOwnProfile && !adminOptional) {
     console.warn(
       '[profile] SUPABASE_SERVICE_ROLE_KEY not available at runtime – other users’ season predictions will be hidden. Check Vercel env vars and redeploy.'
     )
   }
-  const clientForSeason = admin ?? supabase
+  const clientForSeason = adminOptional ?? supabase
   const { data: seasonPrediction } = await clientForSeason
     .from('season_predictions')
     .select('*')
