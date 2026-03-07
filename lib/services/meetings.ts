@@ -146,7 +146,7 @@ export async function canMakePrediction(
   }
 
   const res = await fetch(
-    `${F1_API_URL}/starting_grid?session_key=${qualifyingSession.session_key}&position<=1`
+    `${F1_API_URL}/drivers?session_key=${qualifyingSession.session_key}`
   )
   if (!res.ok) return { canPredict: false, reason: 'Grid data not available' }
 
