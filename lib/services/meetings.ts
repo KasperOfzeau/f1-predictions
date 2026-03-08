@@ -22,32 +22,26 @@ const OPENF1_FETCH_OPTIONS = { next: { revalidate: 60 } } as const
 /**
  * Get the next race/sprint event from the Open F1 API only (no DB).
  * Use this when the user is not logged in to avoid RLS on meetings/sessions.
+ * Picks the globally next Race or Sprint by date_start (so Sprint is shown before the main Race on sprint weekends).
  */
 export async function getNextEventFromApi(): Promise<NextEvent | null> {
   const currentYear = new Date().getFullYear()
   const now = new Date().toISOString()
 
-  const res = await fetch(`${F1_API_URL}/meetings?year=${currentYear}`, OPENF1_FETCH_OPTIONS)
-  if (!res.ok) return null
-  const apiMeetings = await res.json()
+  const [meetingsRes, sessionsRes] = await Promise.all([
+    fetch(`${F1_API_URL}/meetings?year=${currentYear}`, OPENF1_FETCH_OPTIONS),
+    fetch(`${F1_API_URL}/sessions?year=${currentYear}`, OPENF1_FETCH_OPTIONS),
+  ])
+  if (!meetingsRes.ok || !sessionsRes.ok) return null
+
+  const apiMeetings = await meetingsRes.json()
   const grandPrix = apiMeetings.filter((m: { meeting_name: string }) =>
     m.meeting_name.includes('Grand Prix')
   )
-  // Weekend not over yet (date_end >= now), then first by date_start (current or next GP)
-  const nextMeetingApi = grandPrix
-    .filter((m: { date_end: string }) => m.date_end >= now)
-    .sort((a: { date_start: string }, b: { date_start: string }) =>
-      a.date_start.localeCompare(b.date_start)
-    )[0]
-  if (!nextMeetingApi) return null
+  const allSessions = await sessionsRes.json()
 
-  const sessionsRes = await fetch(
-    `${F1_API_URL}/sessions?meeting_key=${nextMeetingApi.meeting_key}`,
-    OPENF1_FETCH_OPTIONS
-  )
-  if (!sessionsRes.ok) return null
-  const sessions = await sessionsRes.json()
-  const nextSessionApi = sessions
+  // Globally next Race or Sprint by date_start (Sprint before Race on sprint weekends)
+  const upcomingRaceOrSprint = allSessions
     .filter(
       (s: { session_name: string }) =>
         s.session_name === 'Race' || s.session_name === 'Sprint'
@@ -56,7 +50,12 @@ export async function getNextEventFromApi(): Promise<NextEvent | null> {
     .sort((a: { date_start: string }, b: { date_start: string }) =>
       a.date_start.localeCompare(b.date_start)
     )[0]
-  if (!nextSessionApi) return null
+  if (!upcomingRaceOrSprint) return null
+
+  const nextMeetingApi = grandPrix.find(
+    (m: { meeting_key: number }) => m.meeting_key === upcomingRaceOrSprint.meeting_key
+  )
+  if (!nextMeetingApi) return null
 
   const meeting: Meeting = {
     id: `api-${nextMeetingApi.meeting_key}`,
@@ -80,21 +79,21 @@ export async function getNextEventFromApi(): Promise<NextEvent | null> {
     updated_at: '',
   }
   const session: Session = {
-    id: `api-${nextSessionApi.session_key}`,
-    session_key: nextSessionApi.session_key,
-    session_type: nextSessionApi.session_type,
-    session_name: nextSessionApi.session_name,
-    date_start: nextSessionApi.date_start,
-    date_end: nextSessionApi.date_end,
-    meeting_key: nextSessionApi.meeting_key,
-    circuit_key: nextSessionApi.circuit_key,
-    circuit_short_name: nextSessionApi.circuit_short_name,
-    country_key: nextSessionApi.country_key,
-    country_code: nextSessionApi.country_code,
-    country_name: nextSessionApi.country_name,
-    location: nextSessionApi.location,
-    gmt_offset: nextSessionApi.gmt_offset,
-    year: nextSessionApi.year,
+    id: `api-${upcomingRaceOrSprint.session_key}`,
+    session_key: upcomingRaceOrSprint.session_key,
+    session_type: upcomingRaceOrSprint.session_type,
+    session_name: upcomingRaceOrSprint.session_name,
+    date_start: upcomingRaceOrSprint.date_start,
+    date_end: upcomingRaceOrSprint.date_end,
+    meeting_key: upcomingRaceOrSprint.meeting_key,
+    circuit_key: upcomingRaceOrSprint.circuit_key,
+    circuit_short_name: upcomingRaceOrSprint.circuit_short_name,
+    country_key: upcomingRaceOrSprint.country_key,
+    country_code: upcomingRaceOrSprint.country_code,
+    country_name: upcomingRaceOrSprint.country_name,
+    location: upcomingRaceOrSprint.location,
+    gmt_offset: upcomingRaceOrSprint.gmt_offset,
+    year: upcomingRaceOrSprint.year,
     created_at: '',
     updated_at: '',
   }

@@ -50,7 +50,7 @@ export default function HomeHero({
           <b>{meeting.meeting_name.split(' ').slice(-2).join(' ')}</b>
         </h2>
         <p className="text-xl sm:text-2xl md:text-3xl text-white opacity-70">
-          {daysToGo} days to go
+          {session.session_name === 'Sprint' ? 'Sprint' : 'Race'} · {daysToGo} days to go
         </p>
       </div>
       <div className="relative z-10 mt-8 sm:mt-10 md:mt-12 flex justify-center">
