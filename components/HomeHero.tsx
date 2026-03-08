@@ -34,12 +34,12 @@ export default function HomeHero({
     <div className="hero relative min-h-75 sm:min-h-112 md:min-h-128 w-full flex flex-col justify-start items-center pb-0 sm:pb-12 pt-8 sm:pt-12 md:pt-16">
       {meeting.circuit_image && (
         <div className="absolute inset-0 flex justify-center items-center pointer-events-none overflow-hidden">
-          <div className="relative w-full h-full min-h-96 sm:min-h-112 md:min-h-128 scale-110 sm:scale-125">
+          <div className="relative w-full h-full max-h-full">
             <Image
               src={meeting.circuit_image}
               alt={`Circuit ${meeting.circuit_short_name}`}
               fill
-              className="object-contain opacity-10 rotate-355"
+              className="object-contain object-center opacity-10 rotate-355"
             />
           </div>
         </div>
