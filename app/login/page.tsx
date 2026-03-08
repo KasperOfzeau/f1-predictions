@@ -19,27 +19,6 @@ function getNoticeFromSearchParams(searchParams: ReturnType<typeof useSearchPara
     }
   }
 
-  if (searchParams.get('resetSent') === '1') {
-    return {
-      type: 'info',
-      message: 'If that email address exists, a password reset link has been sent.',
-    }
-  }
-
-  if (searchParams.get('reset') === '1') {
-    return {
-      type: 'success',
-      message: 'Your password has been updated. You can now log in with your new password.',
-    }
-  }
-
-  if (searchParams.get('resetError') === '1') {
-    return {
-      type: 'error',
-      message: 'That password reset link is invalid or has expired. Please request a new one.',
-    }
-  }
-
   return null
 }
 
@@ -145,12 +124,6 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-        </div>
-
-        <div className="flex justify-end">
-          <Link href="/forgot-password" className="text-sm font-medium text-f1-red hover:text-f1-red-hover">
-            Forgot password?
-          </Link>
         </div>
 
         <div>
