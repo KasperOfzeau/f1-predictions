@@ -6,22 +6,57 @@ import Link from 'next/link'
 import Nav from '@/components/Nav'
 import { loginWithEmailOrUsername } from '@/lib/actions/auth'
 
+type Notice = {
+  type: 'info' | 'success' | 'error'
+  message: string
+}
+
+function getNoticeFromSearchParams(searchParams: ReturnType<typeof useSearchParams>): Notice | null {
+  if (searchParams.get('registered') === '1') {
+    return {
+      type: 'info',
+      message: 'Please check your email and click the confirmation link before logging in.',
+    }
+  }
+
+  if (searchParams.get('resetSent') === '1') {
+    return {
+      type: 'info',
+      message: 'If that email address exists, a password reset link has been sent.',
+    }
+  }
+
+  if (searchParams.get('reset') === '1') {
+    return {
+      type: 'success',
+      message: 'Your password has been updated. You can now log in with your new password.',
+    }
+  }
+
+  if (searchParams.get('resetError') === '1') {
+    return {
+      type: 'error',
+      message: 'That password reset link is invalid or has expired. Please request a new one.',
+    }
+  }
+
+  return null
+}
+
 function LoginForm() {
   const [emailOrUsername, setEmailOrUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showConfirmMessage, setShowConfirmMessage] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [notice] = useState<Notice | null>(() => getNoticeFromSearchParams(searchParams))
 
   useEffect(() => {
-    if (searchParams.get('registered') === '1') {
-      setShowConfirmMessage(true)
-      // Clear the query param from URL without full reload
+    if (notice) {
       router.replace('/login', { scroll: false })
     }
-  }, [searchParams, router])
+  }, [notice, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,13 +90,22 @@ function LoginForm() {
         </p>
       </div>
 
-      {/* {showConfirmMessage && (
-        <div className="bg-white border border-zinc-600 text-black mt-4 px-4 py-3 rounded">
-          Please check your email and click the confirmation link to activate your account. Once you&apos;ve confirmed your email, you can log in below.
-        </div>
-      )} */}
-
       <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        {notice && (
+          <div
+            className={[
+              'px-4 py-3 rounded border',
+              notice.type === 'success' && 'bg-green-50 border-green-200 text-green-700',
+              notice.type === 'info' && 'bg-blue-50 border-blue-200 text-blue-700',
+              notice.type === 'error' && 'bg-red-50 border-red-200 text-red-700',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {notice.message}
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
             {error}
@@ -101,6 +145,12 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+        </div>
+
+        <div className="flex justify-end">
+          <Link href="/forgot-password" className="text-sm font-medium text-f1-red hover:text-f1-red-hover">
+            Forgot password?
+          </Link>
         </div>
 
         <div>
