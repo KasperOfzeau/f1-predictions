@@ -54,7 +54,7 @@ export default function Nav() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/">
-              <h1 className="text-xl font-bold text-white">The Prediction Paddock</h1>
+               <Image src="/logos/TPP_White.svg" alt="The Prediction Paddock" width={100} height={100}/>
             </Link>
           </div>
 
