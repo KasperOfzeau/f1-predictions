@@ -166,6 +166,13 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            <p className="text-xs text-gray-500 text-center">
+              By registering, you agree to our{' '}
+              <Link href="/terms" className="font-medium text-f1-red hover:text-f1-red-hover">Terms of Service</Link>
+              {' '}and{' '}
+              <Link href="/privacy" className="font-medium text-f1-red hover:text-f1-red-hover">Privacy Policy</Link>.
+            </p>
+
             <div>
               <button
                 type="submit"
