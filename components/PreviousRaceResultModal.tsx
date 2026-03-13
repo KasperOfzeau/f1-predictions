@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { toPng } from 'html-to-image'
 import type { Driver, Prediction } from '@/lib/types'
 import { getDriversForMeeting } from '@/lib/services/predictions'
 import Modal from './Modal'
+import ResultShareCard, { SHARE_CARD_WIDTH, SHARE_CARD_HEIGHT } from './ResultShareCard'
 
 type ResultStatus = 'correct' | 'in_top10' | 'wrong'
 
@@ -77,6 +79,8 @@ export default function PreviousRaceResultModal({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [predictionOnly, setPredictionOnly] = useState(false)
+  const [shareBusy, setShareBusy] = useState(false)
+  const shareCardRef = useRef<HTMLDivElement>(null)
 
   // No session key: show prediction only – fetch drivers via qualifying session key (accurate) or meeting key
   useEffect(() => {
@@ -193,20 +197,73 @@ export default function PreviousRaceResultModal({
       ]
     : null
 
-  return (
+  const canShare =
+    !loading &&
+    !error &&
+    resultOrder != null &&
+    resultOrder.length >= 10 &&
+    prediction != null
+
+  async function handleShareImage() {
+    if (!shareCardRef.current || !prediction || !resultOrder || resultOrder.length < 10) return
+    setShareBusy(true)
+    try {
+      const dataUrl = await toPng(shareCardRef.current, {
+        width: SHARE_CARD_WIDTH,
+        height: SHARE_CARD_HEIGHT,
+        pixelRatio: 1,
+        cacheBust: true,
+      })
+      const response = await fetch(dataUrl)
+      const blob = await response.blob()
+      const safeName = meetingName.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim() || 'race'
+      const fileName = `Mijn voorspelling - ${safeName}.png`
+      const file = new File([blob], fileName, { type: 'image/png' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      a.click()
+      URL.revokeObjectURL(url)
+      if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          title: `Mijn voorspelling – ${meetingName}`,
+          files: [file],
+        })
+      }
+    } catch {
+      // Download already happened; share is best-effort
+    } finally {
+      setShareBusy(false)
+    }
+  }
+
+  const modal = (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={`Prediction result – ${meetingName}`}
       size="md"
       footer={
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          Close
-        </button>
+        <div className="flex flex-col gap-2 w-full">
+          {canShare && (
+            <button
+              type="button"
+              onClick={handleShareImage}
+              disabled={shareBusy}
+              className="w-full px-4 py-2 rounded-md font-medium transition-colors bg-f1-red text-white hover:bg-f1-red-hover disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {shareBusy ? 'Bezig…' : 'Deel als afbeelding'}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Close
+          </button>
+        </div>
       }
     >
       {loading && (
@@ -377,6 +434,31 @@ export default function PreviousRaceResultModal({
           )}
         </>
       )}
+
     </Modal>
+  )
+
+  const shareCard = canShare ? (
+    <div
+      aria-hidden
+      style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -1, pointerEvents: 'none' }}
+    >
+      <div ref={shareCardRef}>
+        <ResultShareCard
+          meetingName={meetingName}
+          resultOrder={resultOrder}
+          prediction={prediction}
+          drivers={drivers}
+          points={points}
+        />
+      </div>
+    </div>
+  ) : null
+
+  return (
+    <>
+      {modal}
+      {shareCard}
+    </>
   )
 }
