@@ -17,6 +17,7 @@ interface PreviousRaceResultModalProps {
   /** Qualifying session key – used to fetch drivers for accurate data */
   qualifyingSessionKey?: number | null
   meetingName: string
+  sessionName?: string | null
   prediction: Prediction | null
   points: number | null
 }
@@ -71,6 +72,7 @@ export default function PreviousRaceResultModal({
   meetingKey,
   qualifyingSessionKey,
   meetingName,
+  sessionName,
   prediction,
   points,
 }: PreviousRaceResultModalProps) {
@@ -242,7 +244,7 @@ export default function PreviousRaceResultModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Prediction result – ${meetingName}`}
+      title={`Prediction result – ${meetingName}${sessionName ? ` (${sessionName})` : ''}`}
       size="md"
       footer={
         <div className="flex flex-col gap-2 w-full">

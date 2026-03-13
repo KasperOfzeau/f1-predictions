@@ -75,6 +75,7 @@ export default function ProfilePredictionsList({
             month: 'short',
             year: 'numeric',
           })
+          const sessionLabel = item.sessionName ?? 'Race'
           return (
             <li key={item.prediction.id}>
               <button
@@ -86,7 +87,9 @@ export default function ProfilePredictionsList({
                   <p className="font-medium text-carbon-black truncate">
                     {item.meetingName}
                   </p>
-                  <p className="text-sm text-zinc-500">{dateLabel}</p>
+                  <p className="text-sm text-zinc-500">
+                    {sessionLabel} · {dateLabel}
+                  </p>
                 </div>
                 <div className="shrink-0 flex items-center gap-2">
                   {item.points != null && (
@@ -110,6 +113,7 @@ export default function ProfilePredictionsList({
           meetingKey={selected.meetingKey}
           qualifyingSessionKey={selected.qualifyingSessionKey}
           meetingName={selected.meetingName}
+          sessionName={selected.sessionName}
           prediction={selected.prediction}
           points={selected.points}
         />

@@ -13,6 +13,7 @@ export interface PredictionWithMeta {
   meetingName: string
   meetingKey: number
   sessionKey: number | null
+  sessionName: string | null
   /** Qualifying session key – use this to fetch drivers for accurate data */
   qualifyingSessionKey: number | null
   points: number | null
@@ -90,6 +91,7 @@ export async function getRecentPredictionsForUser(
       meetingName: meeting.meeting_name as string,
       meetingKey,
       sessionKey: session?.session_key ?? null,
+      sessionName: session?.session_name ?? null,
       qualifyingSessionKey: qualifyingSession?.session_key ?? null,
       points: (row as Prediction).points ?? null,
       dateStart: meeting.date_start as string,
