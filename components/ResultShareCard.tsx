@@ -6,6 +6,7 @@ type ResultStatus = 'correct' | 'in_top10' | 'wrong'
 
 interface ResultShareCardProps {
   meetingName: string
+  sessionName?: string | null
   resultOrder: number[]
   prediction: Prediction
   drivers: Driver[]
@@ -20,17 +21,6 @@ function getStatus(
   if (predictedDriver === actualDriver) return 'correct'
   if (resultOrder.includes(predictedDriver)) return 'in_top10'
   return 'wrong'
-}
-
-function getStatusBorderColor(status: ResultStatus): string {
-  switch (status) {
-    case 'correct':
-      return '#10b981'
-    case 'in_top10':
-      return '#f59e0b'
-    case 'wrong':
-      return '#ef4444'
-  }
 }
 
 function getPointsForStatus(status: ResultStatus): number {
@@ -48,16 +38,74 @@ function driverByNumber(drivers: Driver[], driverNumber: number): Driver | undef
   return drivers.find((d) => d.driver_number === driverNumber)
 }
 
+function getSessionLabel(sessionName?: string | null): string | null {
+  if (!sessionName) return null
+
+  const normalizedSession = sessionName.trim().toLowerCase()
+  if (normalizedSession.includes('sprint')) return 'Sprint'
+  if (normalizedSession.includes('race')) return 'Race'
+
+  return sessionName.trim()
+}
+
+function renderDriverBadge(driver: Driver) {
+  if (driver.headshot_url) {
+    return (
+      <span
+        style={{
+          display: 'inline-flex',
+          width: 36,
+          height: 36,
+          borderRadius: '50%',
+          overflow: 'hidden',
+          flexShrink: 0,
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.12)',
+        }}
+      >
+        <img
+          src={driver.headshot_url}
+          alt={driver.full_name}
+          width={36}
+          height={36}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center top',
+          }}
+        />
+      </span>
+    )
+  }
+
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        width: 16,
+        height: 16,
+        borderRadius: '50%',
+        backgroundColor: driver.team_colour ? `#${driver.team_colour}` : '#94a3b8',
+        flexShrink: 0,
+      }}
+    />
+  )
+}
+
 export const SHARE_CARD_WIDTH = 1080
 export const SHARE_CARD_HEIGHT = 1920
 
 export default function ResultShareCard({
   meetingName,
+  sessionName,
   resultOrder,
   prediction,
   drivers,
   points,
 }: ResultShareCardProps) {
+  const sessionLabel = getSessionLabel(sessionName)
   const predOrder = [
     prediction.position_1,
     prediction.position_2,
@@ -102,19 +150,6 @@ export default function ResultShareCard({
     }
   }
 
-  function getStatusRowBackground(status: ResultStatus | null): string {
-    switch (status) {
-      case 'correct':
-        return 'rgba(16,185,129,0.12)'
-      case 'in_top10':
-        return 'rgba(245,158,11,0.10)'
-      case 'wrong':
-        return 'rgba(239,68,68,0.10)'
-      default:
-        return 'rgba(255,255,255,0.03)'
-    }
-  }
-
   return (
     <div
       style={{
@@ -146,7 +181,7 @@ export default function ResultShareCard({
                 fontSize: 52,
                 fontWeight: 700,
                 margin: 0,
-                marginBottom: 12,
+                marginBottom: 6,
               }}
             >
               {meetingName}
@@ -154,17 +189,16 @@ export default function ResultShareCard({
             <p
               style={{
                 fontSize: 38,
-                color: 'rgba(255,255,255,0.7)',
                 margin: 0,
               }}
             >
-              My prediction
+              {sessionLabel ? `${sessionLabel} · My prediction result` : 'My prediction result'}
             </p>
           </div>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 179.03 56.27"
-            style={{ width: 220, height: 'auto', flexShrink: 0, marginTop: 6 }}
+            style={{ width: 260, height: 'auto', flexShrink: 0, marginTop: 20 }}
           >
             <g>
               <path fill="#fff" d="M72.36,10.96c.2,0,.43.01.69.03s.47.05.64.08l-.3,3.67c-.13-.04-.31-.07-.55-.1-.24-.02-.44-.03-.61-.03-.51,0-1,.06-1.47.19s-.9.34-1.28.62-.67.66-.89,1.13-.33,1.04-.33,1.71v7.31h-3.92v-14.36h2.97l.58,2.41h.19c.28-.49.64-.93,1.06-1.34s.91-.73,1.45-.98c.54-.25,1.13-.37,1.77-.37Z"/>
@@ -201,72 +235,79 @@ export default function ResultShareCard({
 
         <div
           style={{
-            marginBottom: 36,
-            padding: '48px 48px 48px',
-            borderRadius: 24,
-            backgroundColor: 'rgba(255,255,255,0.05)',
+            marginBottom: 28,
+            padding: '28px 32px',
+            borderRadius: 20,
+            backgroundColor: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 16px 40px rgba(0,0,0,0.28)',
+            boxShadow: '0 10px 24px rgba(0,0,0,0.22)',
           }}
         >
           <div
             style={{
-              fontSize: 38,
+              fontSize: 24,
               fontWeight: 700,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.55)',
-              marginBottom: 12,
+              color: 'rgba(255,255,255,0.45)',
+              marginBottom: 10,
             }}
           >
             Race score
           </div>
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <div
               style={{
-                flex: '0 0 50%',
+                flex: '0 0 33%',
                 display: 'flex',
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  fontSize: 88,
+                  fontSize: 64,
                   lineHeight: 1,
                   fontWeight: 800,
                 }}
               >
                 {points != null ? `${points}` : '—'}
-                <span style={{ fontSize: 36, fontWeight: 700, color: 'rgba(255,255,255,0.65)', marginLeft: 12 }}>
+                <span style={{ fontSize: 24, fontWeight: 700, color: 'rgba(255,255,255,0.55)', marginLeft: 8 }}>
                   pts
                 </span>
               </div>
             </div>
-            <div style={{ flex: '0 0 50%', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ flex: '0 0 67%', display: 'flex', gap: 10 }}>
               <div
                 style={{
-                  padding: '14px 18px',
-                  borderRadius: 16,
-                  backgroundColor: 'rgba(16,185,129,0.12)',
-                  border: '1px solid rgba(16,185,129,0.24)',
+                  flex: 1,
+                  padding: '12px 14px',
+                  borderRadius: 14,
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)',
                   display: 'flex',
-                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                   gap: 12,
                 }}
               >
-                <div style={{ fontSize: 38, color: 'rgba(255,255,255,0.58)', marginBottom: 6 }}>Correct:</div>
-                <div style={{ fontSize: 48, fontWeight: 700, color: '#34d399' }}>{correctCount}</div>
+                <div style={{ fontSize: 20, fontWeight: 600, color: 'rgba(255,255,255,0.62)' }}>Correct</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#34d399' }}>{correctCount}</div>
               </div>
               <div
                 style={{
-                  padding: '14px 18px',
-                  borderRadius: 16,
-                  backgroundColor: 'rgba(245,158,11,0.10)',
-                  border: '1px solid rgba(245,158,11,0.22)',
+                  flex: 1,
+                  padding: '12px 14px',
+                  borderRadius: 14,
+                  backgroundColor: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
                 }}
               >
-                <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.58)', marginBottom: 6 }}>In top 10</div>
-                <div style={{ fontSize: 30, fontWeight: 700, color: '#fbbf24' }}>{inTop10Count}</div>
+                <div style={{ fontSize: 20, fontWeight: 600, color: 'rgba(255,255,255,0.62)' }}>In top 10</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#fbbf24' }}>{inTop10Count}</div>
               </div>
             </div>
           </div>
@@ -279,8 +320,7 @@ export default function ResultShareCard({
               gridTemplateColumns: '56px 1fr 1fr 64px',
               gap: 16,
               paddingTop: 8,
-              paddingBottom: 20,
-              borderBottom: '2px solid rgba(255,255,255,0.2)',
+              paddingBottom: 24,
               fontSize: 28,
               fontWeight: 800,
               color: '#ffffff',
@@ -296,7 +336,6 @@ export default function ResultShareCard({
 
           <div>
             {rows.map((row) => {
-              const borderColor = getStatusBorderColor(row.status ?? 'wrong')
               return (
                 <div
                   key={`${row.position}-${row.driverNumber}`}
@@ -308,9 +347,11 @@ export default function ResultShareCard({
                     padding: '18px 18px 18px 14px',
                     marginTop: 10,
                     borderRadius: 16,
-                    backgroundColor: getStatusRowBackground(row.status),
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderLeft: `5px solid ${borderColor}`,
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                    borderRight: '1px solid rgba(255,255,255,0.06)',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    borderLeft: '1px solid rgba(255,255,255,0.06)',
                     fontSize: 28,
                   }}
                 >
@@ -320,18 +361,7 @@ export default function ResultShareCard({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     {row.actualDriver ? (
                       <>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            width: 16,
-                            height: 16,
-                            borderRadius: '50%',
-                            backgroundColor: row.actualDriver.team_colour
-                              ? `#${row.actualDriver.team_colour}`
-                              : '#94a3b8',
-                            flexShrink: 0,
-                          }}
-                        />
+                        {renderDriverBadge(row.actualDriver)}
                         <span style={{ fontWeight: 600 }}>{row.actualDriver.name_acronym}</span>
                       </>
                     ) : (
@@ -341,18 +371,7 @@ export default function ResultShareCard({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     {row.predictedDriverInfo ? (
                       <>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            width: 16,
-                            height: 16,
-                            borderRadius: '50%',
-                            backgroundColor: row.predictedDriverInfo.team_colour
-                              ? `#${row.predictedDriverInfo.team_colour}`
-                              : '#e2e8f0',
-                            flexShrink: 0,
-                          }}
-                        />
+                        {renderDriverBadge(row.predictedDriverInfo)}
                         <span
                           style={{
                             fontWeight: 600,
@@ -377,7 +396,7 @@ export default function ResultShareCard({
 
         <div
           style={{
-            marginTop: 'auto',
+            marginTop: '48px',
             padding: '30px 28px',
             borderRadius: 24,
             backgroundColor: 'rgba(255,255,255,0.04)',
@@ -387,7 +406,7 @@ export default function ResultShareCard({
         >
           <div
             style={{
-              fontSize: 30,
+              fontSize: 42,
               fontWeight: 700,
               marginBottom: 12,
             }}
@@ -396,7 +415,7 @@ export default function ResultShareCard({
           </div>
           <div
             style={{
-              fontSize: 24,
+              fontSize: 36,
               color: 'rgba(255,255,255,0.75)',
               letterSpacing: '0.04em',
             }}

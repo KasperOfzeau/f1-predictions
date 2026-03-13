@@ -35,6 +35,10 @@ export default function PreviousRaceCard({
   qualifyingSessionKey = null,
 }: PreviousRaceCardProps) {
   const [showResultModal, setShowResultModal] = useState(false)
+  const sessionLabel = lastEvent?.session.session_name === 'Sprint' ? 'Previous sprint' : 'Previous race'
+  const noPredictionLabel = lastEvent?.session.session_name === 'Sprint'
+    ? 'No prediction made for this sprint'
+    : 'No prediction made for this race'
 
   return (
     <div className="relative rounded-xl border border-white/10 p-6 overflow-hidden min-h-[450px] bg-white/5">
@@ -49,11 +53,12 @@ export default function PreviousRaceCard({
           />
         </div>
       )}
-      <h3 className="relative z-10 text-2xl font-semibold text-white mb-2">Previous race</h3>
+      <h3 className="relative z-10 text-2xl font-semibold text-white mb-2">{sessionLabel}</h3>
       <div className="absolute top-1/2 z-10 left-0 right-0 -translate-y-1/2 text-center p-6">
         <h4 className="text-white/80 text-4xl font-bold">{lastEvent?.meeting.meeting_name ?? '—'}</h4>
         {lastEvent && (
           <p className="text-white/60 mt-2 text-lg">
+            {lastEvent.session.session_name} ·{' '}
             {new Date(lastEvent.session.date_start).toLocaleDateString('en-GB', {
               weekday: 'short',
               day: 'numeric',
@@ -79,7 +84,7 @@ export default function PreviousRaceCard({
                 </button>
               </>
             ) : (
-              <p className="text-white/50 text-sm">No prediction made for this race</p>
+              <p className="text-white/50 text-sm">{noPredictionLabel}</p>
             )}
           </div>
         )}
@@ -93,6 +98,7 @@ export default function PreviousRaceCard({
           meetingKey={lastEvent.meeting.meeting_key}
           qualifyingSessionKey={qualifyingSessionKey}
           meetingName={lastEvent.meeting.meeting_name}
+          sessionName={lastEvent.session.session_name}
           prediction={prediction}
           points={points}
         />

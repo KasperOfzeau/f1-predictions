@@ -244,7 +244,7 @@ export default function PreviousRaceResultModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Prediction result – ${meetingName}${sessionName ? ` (${sessionName})` : ''}`}
+      title={`${meetingName}${sessionName ? ` (${sessionName})` : ''}`}
       size="md"
       footer={
         <div className="flex flex-col gap-2 w-full">
@@ -253,9 +253,27 @@ export default function PreviousRaceResultModal({
               type="button"
               onClick={handleShareImage}
               disabled={shareBusy}
-              className="w-full px-4 py-2 rounded-md font-medium transition-colors bg-f1-red text-white hover:bg-f1-red-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2 rounded-md font-medium transition-colors bg-f1-red text-white hover:bg-f1-red-hover disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
             >
-              {shareBusy ? 'Bezig…' : 'Deel als afbeelding'}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <path d="m8.59 13.51 6.83 3.98" />
+                <path d="m15.41 6.51-6.82 3.98" />
+              </svg>
+              <span>{shareBusy ? 'Sharing…' : 'Share results'}</span>
             </button>
           )}
           <button
@@ -448,6 +466,7 @@ export default function PreviousRaceResultModal({
       <div ref={shareCardRef}>
         <ResultShareCard
           meetingName={meetingName}
+          sessionName={sessionName}
           resultOrder={resultOrder}
           prediction={prediction}
           drivers={drivers}
