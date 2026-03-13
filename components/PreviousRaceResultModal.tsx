@@ -219,7 +219,7 @@ export default function PreviousRaceResultModal({
       const response = await fetch(dataUrl)
       const blob = await response.blob()
       const safeName = meetingName.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim() || 'race'
-      const fileName = `Mijn voorspelling - ${safeName}.png`
+      const fileName = `My prediction - ${safeName}.png`
       const file = new File([blob], fileName, { type: 'image/png' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
