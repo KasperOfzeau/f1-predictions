@@ -20,6 +20,9 @@ interface PreviousRaceResultModalProps {
   sessionName?: string | null
   prediction: Prediction | null
   points: number | null
+  sharerName?: string | null
+  sharerAvatarUrl?: string | null
+  allowShare?: boolean
 }
 
 function getStatus(
@@ -58,6 +61,31 @@ function driverByNumber(drivers: Driver[], driverNumber: number): Driver | undef
   return drivers.find((d) => d.driver_number === driverNumber)
 }
 
+function renderDriverBadge(driver: Driver) {
+  if (driver.headshot_url) {
+    return (
+      <span className="inline-flex w-6 h-6 rounded-full overflow-hidden shrink-0 bg-gray-100 border border-gray-200">
+        <img
+          src={driver.headshot_url}
+          alt={driver.full_name}
+          width={24}
+          height={24}
+          className="block w-full h-full object-cover object-top"
+        />
+      </span>
+    )
+  }
+
+  return (
+    <span
+      className="inline-block w-3.5 h-3.5 rounded-full shrink-0"
+      style={{
+        backgroundColor: driver.team_colour ? `#${driver.team_colour}` : '#94a3b8',
+      }}
+    />
+  )
+}
+
 async function fetchDriversBySessionKey(sessionKey: number): Promise<Driver[]> {
   const res = await fetch(`/api/drivers?session_key=${sessionKey}`)
   if (!res.ok) return []
@@ -75,6 +103,9 @@ export default function PreviousRaceResultModal({
   sessionName,
   prediction,
   points,
+  sharerName = null,
+  sharerAvatarUrl = null,
+  allowShare = false,
 }: PreviousRaceResultModalProps) {
   const [resultOrder, setResultOrder] = useState<number[] | null>(null)
   const [drivers, setDrivers] = useState<Driver[]>([])
@@ -200,6 +231,7 @@ export default function PreviousRaceResultModal({
     : null
 
   const canShare =
+    allowShare &&
     !loading &&
     !error &&
     resultOrder != null &&
@@ -318,14 +350,7 @@ export default function PreviousRaceResultModal({
                   <div className="flex items-center gap-1.5 flex-1 min-w-0">
                     {driverInfo ? (
                       <>
-                        <span
-                          className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{
-                            backgroundColor: driverInfo.team_colour
-                              ? `#${driverInfo.team_colour}`
-                              : '#e2e8f0',
-                          }}
-                        />
+                        {renderDriverBadge(driverInfo)}
                         <span className="font-medium text-sm text-gray-900">
                           {driverInfo.name_acronym}
                         </span>
@@ -389,14 +414,7 @@ export default function PreviousRaceResultModal({
                   <div className="flex items-center gap-1.5 flex-1 min-w-0">
                     {actualDriver ? (
                       <>
-                        <span
-                          className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{
-                            backgroundColor: actualDriver.team_colour
-                              ? `#${actualDriver.team_colour}`
-                              : '#94a3b8',
-                          }}
-                        />
+                        {renderDriverBadge(actualDriver)}
                         <span className="font-medium text-sm text-gray-900 truncate">
                           {actualDriver.name_acronym}
                         </span>
@@ -410,21 +428,14 @@ export default function PreviousRaceResultModal({
                       <div className="flex items-center gap-1.5 flex-1 min-w-0">
                         {predictedDriverInfo ? (
                           <>
-                            <span
-                              className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                              style={{
-                                backgroundColor: predictedDriverInfo.team_colour
-                                  ? `#${predictedDriverInfo.team_colour}`
-                                  : '#e2e8f0',
-                              }}
-                            />
+                            {renderDriverBadge(predictedDriverInfo)}
                             <span
                               className={
                                 status === 'correct'
                                   ? 'font-semibold text-sm text-emerald-700'
                                   : status === 'in_top10'
                                     ? 'text-sm text-amber-700'
-                                    : 'text-sm text-gray-500'
+                                    : 'text-sm text-red-700'
                               }
                             >
                               {predictedDriverInfo.name_acronym}
@@ -471,6 +482,8 @@ export default function PreviousRaceResultModal({
           prediction={prediction}
           drivers={drivers}
           points={points}
+          sharerName={sharerName}
+          sharerAvatarUrl={sharerAvatarUrl}
         />
       </div>
     </div>

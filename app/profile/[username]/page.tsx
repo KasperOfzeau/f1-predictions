@@ -47,6 +47,7 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
   const isOwnProfile = !!currentUser && currentUser.id === profile.id
 
   const displayLetter = profile.username?.charAt(0)?.toUpperCase() || '?'
+  const shareUsername = profile.username ?? null
 
   const currentSeasonYear = new Date().getMonth() === 0
     ? new Date().getFullYear() - 1
@@ -153,6 +154,8 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
                 seasonPrediction={seasonPrediction ?? null}
                 seasonYear={currentSeasonYear}
                 isOwnProfile={isOwnProfile}
+                sharerName={shareUsername}
+                sharerAvatarUrl={profile.avatar_url}
               />
             </div>
 

@@ -24,6 +24,8 @@ interface PreviousRaceCardProps {
   isLoggedIn?: boolean
   /** Qualifying session key – used to fetch drivers for the result modal */
   qualifyingSessionKey?: number | null
+  sharerName?: string | null
+  sharerAvatarUrl?: string | null
 }
 
 export default function PreviousRaceCard({
@@ -33,6 +35,8 @@ export default function PreviousRaceCard({
   prediction,
   isLoggedIn = false,
   qualifyingSessionKey = null,
+  sharerName = null,
+  sharerAvatarUrl = null,
 }: PreviousRaceCardProps) {
   const [showResultModal, setShowResultModal] = useState(false)
   const sessionLabel = lastEvent?.session.session_name === 'Sprint' ? 'Previous sprint' : 'Previous race'
@@ -101,6 +105,9 @@ export default function PreviousRaceCard({
           sessionName={lastEvent.session.session_name}
           prediction={prediction}
           points={points}
+          sharerName={sharerName}
+          sharerAvatarUrl={sharerAvatarUrl}
+          allowShare={isLoggedIn}
         />
       )}
     </div>

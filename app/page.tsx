@@ -142,15 +142,26 @@ export default async function HomePage() {
   // When logged in: check if user has a prediction for the last race and get points
   let previousPrediction: Prediction | null = null
   let previousPoints: number | null = null
+  let currentUsername: string | null = null
+  let currentUserAvatarUrl: string | null = null
   if (user && lastEvent) {
-    const { data } = await supabase
-      .from('predictions')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('session_key', lastEvent.session.session_key)
-      .single()
+    const [{ data }, { data: profile }] = await Promise.all([
+      supabase
+        .from('predictions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('session_key', lastEvent.session.session_key)
+        .single(),
+      supabase
+        .from('profiles')
+        .select('full_name, username, avatar_url')
+        .eq('id', user.id)
+        .maybeSingle(),
+    ])
     previousPrediction = data ?? null
     previousPoints = await getPointsForPrediction(previousPrediction, lastEvent.session.session_key)
+    currentUsername = profile?.username ?? null
+    currentUserAvatarUrl = profile?.avatar_url ?? null
   }
 
   // Qualifying session key voor drivers in result modal (race weekend = qualifying session voor driverlijst)
@@ -288,6 +299,8 @@ export default async function HomePage() {
               prediction={previousPrediction}
               isLoggedIn={!!user}
               qualifyingSessionKey={qualifyingSessionKey}
+              sharerName={currentUsername}
+              sharerAvatarUrl={currentUserAvatarUrl}
             />
           </section>
       </main>

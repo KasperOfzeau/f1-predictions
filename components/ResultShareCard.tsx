@@ -11,6 +11,8 @@ interface ResultShareCardProps {
   prediction: Prediction
   drivers: Driver[]
   points: number | null
+  sharerName?: string | null
+  sharerAvatarUrl?: string | null
 }
 
 function getStatus(
@@ -46,6 +48,17 @@ function getSessionLabel(sessionName?: string | null): string | null {
   if (normalizedSession.includes('race')) return 'Race'
 
   return sessionName.trim()
+}
+
+function getDisplayInitial(name?: string | null): string {
+  const normalizedName = name?.trim()
+  return normalizedName?.charAt(0).toUpperCase() || '?'
+}
+
+function getPredictionOwnerLabel(username?: string | null): string | null {
+  const normalizedUsername = username?.trim().replace(/^@+/, '')
+  if (!normalizedUsername) return null
+  return `@${normalizedUsername}'s prediction`
 }
 
 function renderDriverBadge(driver: Driver) {
@@ -94,6 +107,59 @@ function renderDriverBadge(driver: Driver) {
   )
 }
 
+function renderSharerBadge(name?: string | null, avatarUrl?: string | null) {
+  if (avatarUrl) {
+    return (
+      <span
+        style={{
+          display: 'inline-flex',
+          width: 58,
+          height: 58,
+          borderRadius: '50%',
+          overflow: 'hidden',
+          flexShrink: 0,
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          border: '1px solid rgba(255,255,255,0.16)',
+        }}
+      >
+        <img
+          src={avatarUrl}
+          alt={name || 'Profile'}
+          width={58}
+          height={58}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      </span>
+    )
+  }
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 58,
+        height: 58,
+        borderRadius: '50%',
+        flexShrink: 0,
+        backgroundColor: 'rgba(255,255,255,0.12)',
+        border: '1px solid rgba(255,255,255,0.16)',
+        fontSize: 24,
+        fontWeight: 700,
+        color: '#ffffff',
+      }}
+    >
+      {getDisplayInitial(name)}
+    </span>
+  )
+}
+
 export const SHARE_CARD_WIDTH = 1080
 export const SHARE_CARD_HEIGHT = 1920
 
@@ -104,6 +170,8 @@ export default function ResultShareCard({
   prediction,
   drivers,
   points,
+  sharerName = null,
+  sharerAvatarUrl = null,
 }: ResultShareCardProps) {
   const sessionLabel = getSessionLabel(sessionName)
   const predOrder = [
@@ -186,14 +254,38 @@ export default function ResultShareCard({
             >
               {meetingName}
             </h1>
-            <p
-              style={{
-                fontSize: 38,
-                margin: 0,
-              }}
-            >
-              {sessionLabel ? `${sessionLabel} · My prediction result` : 'My prediction result'}
-            </p>
+            {sessionLabel ? (
+              <p
+                style={{
+                  fontSize: 32,
+                  margin: 0,
+                  color: 'rgba(255,255,255,0.68)',
+                }}
+              >
+                {sessionLabel}
+              </p>
+            ) : null}
+            {getPredictionOwnerLabel(sharerName) ? (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  marginTop: 20,
+                }}
+              >
+                {renderSharerBadge(sharerName, sharerAvatarUrl)}
+                <span
+                  style={{
+                    fontSize: 38,
+                    fontWeight: 600,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {getPredictionOwnerLabel(sharerName)}
+                </span>
+              </div>
+            ) : null}
           </div>
           <svg
             xmlns="http://www.w3.org/2000/svg"

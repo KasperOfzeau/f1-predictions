@@ -19,6 +19,8 @@ interface ProfilePredictionsListProps {
   seasonYear: number
   /** When false, empty state says "They haven't made...". Default true (own profile). */
   isOwnProfile?: boolean
+  sharerName?: string | null
+  sharerAvatarUrl?: string | null
 }
 
 export default function ProfilePredictionsList({
@@ -26,6 +28,8 @@ export default function ProfilePredictionsList({
   seasonPrediction,
   seasonYear,
   isOwnProfile = true,
+  sharerName = null,
+  sharerAvatarUrl = null,
 }: ProfilePredictionsListProps) {
   const [selected, setSelected] = useState<PredictionWithMeta | null>(null)
   const [showSeasonModal, setShowSeasonModal] = useState(false)
@@ -116,6 +120,9 @@ export default function ProfilePredictionsList({
           sessionName={selected.sessionName}
           prediction={selected.prediction}
           points={selected.points}
+          sharerName={sharerName}
+          sharerAvatarUrl={sharerAvatarUrl}
+          allowShare={isOwnProfile}
         />
       )}
 
