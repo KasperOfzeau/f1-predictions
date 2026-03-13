@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 export type ModalSize = 'sm' | 'md' | 'lg' | 'full'
 
@@ -46,6 +47,12 @@ export default function Modal({
   closeOnOverlayClick = true,
   className = '',
 }: ModalProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     if (!isOpen) return
     const handleEscape = (e: KeyboardEvent) => {
@@ -59,9 +66,9 @@ export default function Modal({
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
+  if (!mounted || !isOpen) return null
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
@@ -119,6 +126,7 @@ export default function Modal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

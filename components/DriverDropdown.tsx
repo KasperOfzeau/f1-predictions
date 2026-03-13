@@ -123,7 +123,7 @@ export default function DriverDropdown({
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-          <div className="sticky top-0 bg-white border-b border-gray-200 p-2">
+          <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-2">
             <input
               ref={searchInputRef}
               type="text"
