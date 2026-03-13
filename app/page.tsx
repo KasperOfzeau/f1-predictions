@@ -132,7 +132,7 @@ export default async function HomePage() {
         .from('predictions')
         .select('id')
         .eq('user_id', user.id)
-        .eq('race_id', nextEvent.meeting.id)
+        .eq('session_key', nextEvent.session.session_key)
         .single(),
     ])
     nextEventPredictionAvailability = predictionAvailability
@@ -147,7 +147,7 @@ export default async function HomePage() {
       .from('predictions')
       .select('*')
       .eq('user_id', user.id)
-      .eq('race_id', lastEvent.meeting.id)
+      .eq('session_key', lastEvent.session.session_key)
       .single()
     previousPrediction = data ?? null
     previousPoints = await getPointsForPrediction(previousPrediction, lastEvent.session.session_key)
@@ -157,7 +157,10 @@ export default async function HomePage() {
   let qualifyingSessionKey: number | null = null
   if (lastEvent) {
     const qualifyingSessions = await getQualifyingForMeeting(lastEvent.meeting.meeting_key)
-    const qualifyingSession = qualifyingSessions.find((s) => s.session_name === 'Qualifying')
+    const qualifyingName = lastEvent.session.session_name === 'Sprint'
+      ? 'Sprint Qualifying'
+      : 'Qualifying'
+    const qualifyingSession = qualifyingSessions.find((s) => s.session_name === qualifyingName)
       ?? qualifyingSessions[0] ?? null
     qualifyingSessionKey = qualifyingSession?.session_key ?? null
   }

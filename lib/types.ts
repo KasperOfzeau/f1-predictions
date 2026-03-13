@@ -114,6 +114,7 @@ export interface Prediction {
   id: string
   user_id: string
   race_id: string
+  session_key: number | null
   position_1: number
   position_2: number
   position_3: number

@@ -72,9 +72,9 @@ export function getTeamsFromDrivers(drivers: Driver[]): TeamFromDrivers[] {
 }
 
 /**
- * Get existing prediction for current user and meeting
+ * Get existing prediction for current user and session
  */
-export async function getUserPrediction(meetingId: string): Promise<Prediction | null> {
+export async function getUserPrediction(sessionKey: number): Promise<Prediction | null> {
   try {
     const supabase = createClient()
 
@@ -86,12 +86,12 @@ export async function getUserPrediction(meetingId: string): Promise<Prediction |
       return null
     }
 
-    // Fetch prediction
+    // Fetch prediction for this specific race/sprint session
     const { data, error } = await supabase
       .from('predictions')
       .select('*')
       .eq('user_id', user.id)
-      .eq('race_id', meetingId)
+      .eq('session_key', sessionKey)
       .single()
 
     if (error) {
@@ -112,11 +112,13 @@ export async function getUserPrediction(meetingId: string): Promise<Prediction |
 
 /**
  * Save or update prediction (uses UPSERT)
- * @param meetingId - The meeting ID (race_id in database)
+ * @param meetingId - The meeting ID (legacy race_id column in database)
+ * @param sessionKey - The specific Race or Sprint session key
  * @param driverIds - Array of 10 driver IDs in predicted finishing order
  */
 export async function savePrediction(
   meetingId: string,
+  sessionKey: number,
   driverIds: number[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -146,6 +148,7 @@ export async function savePrediction(
       .upsert({
         user_id: user.id,
         race_id: meetingId,
+        session_key: sessionKey,
         position_1: driverIds[0],
         position_2: driverIds[1],
         position_3: driverIds[2],
@@ -158,7 +161,7 @@ export async function savePrediction(
         position_10: driverIds[9],
         updated_at: new Date().toISOString(),
       }, {
-        onConflict: 'user_id,race_id'
+        onConflict: 'user_id,session_key'
       })
 
     if (error) {

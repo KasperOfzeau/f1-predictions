@@ -30,10 +30,10 @@ export default function PredictionModal({ isOpen, onClose, onPredictionSaved, se
       setError(null)
 
       try {
-        const driversData = await getDriversForMeeting('latest')
+        const driversData = await getDriversForMeeting(meeting.meeting_key)
         setDrivers(driversData)
 
-        const existingPrediction = await getUserPrediction(meeting.id)
+        const existingPrediction = await getUserPrediction(session.session_key)
         if (existingPrediction) {
           setSelectedDrivers([
             existingPrediction.position_1,
@@ -57,7 +57,7 @@ export default function PredictionModal({ isOpen, onClose, onPredictionSaved, se
     }
 
     loadData()
-  }, [isOpen, meeting.id, meeting.meeting_key])
+  }, [isOpen, meeting.meeting_key, session.session_key])
 
   const handleSelectDriver = (position: number, driverId: number | null) => {
     const newSelection = [...selectedDrivers]
@@ -84,7 +84,7 @@ export default function PredictionModal({ isOpen, onClose, onPredictionSaved, se
     setError(null)
 
     const driverIds = selectedDrivers.filter((id): id is number => id !== null)
-    const result = await savePrediction(meeting.id, driverIds)
+    const result = await savePrediction(meeting.id, session.session_key, driverIds)
 
     setSaving(false)
 

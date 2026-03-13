@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getLastEvent } from '@/lib/services/meetings'
-import { getLastRaceOrSprintForMeeting } from '@/lib/services/sessions'
 import { getPointsForPrediction } from '@/lib/services/scoring'
 import type { Prediction } from '@/lib/types'
 
@@ -35,12 +34,12 @@ async function backfillMissingPredictionPoints(
   const updatedUserIds = new Set<string>()
   if (userIds.length === 0) return updatedUserIds
 
-  const now = new Date().toISOString()
   const { data: predictionsRaw, error } = await admin
     .from('predictions')
     .select('*, meetings!inner(meeting_key, year)')
     .in('user_id', userIds)
     .is('points', null)
+    .not('session_key', 'is', null)
 
   if (error || !predictionsRaw?.length) return updatedUserIds
 
@@ -52,17 +51,13 @@ async function backfillMissingPredictionPoints(
   )
 
   for (const row of forYear) {
-    const meeting = Array.isArray(row.meetings) ? row.meetings[0] : row.meetings
-    const meetingKey = meeting?.meeting_key
-    if (meetingKey == null) continue
-
-    const session = await getLastRaceOrSprintForMeeting(admin, meetingKey, now)
-    if (!session) continue
+    if (typeof row.session_key !== 'number') continue
 
     const prediction: Prediction = {
       id: row.id,
       user_id: row.user_id,
       race_id: row.race_id,
+      session_key: row.session_key,
       position_1: row.position_1,
       position_2: row.position_2,
       position_3: row.position_3,
@@ -77,7 +72,7 @@ async function backfillMissingPredictionPoints(
       created_at: row.created_at,
       updated_at: row.updated_at,
     }
-    const newPoints = await getPointsForPrediction(prediction, session.session_key, admin)
+    const newPoints = await getPointsForPrediction(prediction, row.session_key, admin)
     if (newPoints != null) updatedUserIds.add(row.user_id)
   }
 
