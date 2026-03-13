@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import type { Driver } from '@/lib/types'
 
@@ -20,9 +20,26 @@ export default function DriverDropdown({
   position,
 }: DriverDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   const selectedDriver = drivers.find(d => d.driver_number === selectedDriverId)
+  const filteredDrivers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    if (!query) return drivers
+
+    return drivers.filter((driver) => {
+      const searchableValues = [
+        driver.full_name,
+        driver.name_acronym,
+        String(driver.driver_number),
+      ]
+
+      return searchableValues.some(value => value.toLowerCase().includes(query))
+    })
+  }, [drivers, searchQuery])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -39,6 +56,19 @@ export default function DriverDropdown({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery('')
+      return
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      searchInputRef.current?.focus()
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
   }, [isOpen])
 
   return (
@@ -93,6 +123,18 @@ export default function DriverDropdown({
       {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-2">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search by name or number..."
+              aria-label={`Search driver for position ${position + 1}`}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-f1-red focus:border-transparent"
+            />
+          </div>
+
           {/* Clear Selection Option */}
           <button
             type="button"
@@ -106,7 +148,7 @@ export default function DriverDropdown({
           </button>
 
           {/* Driver Options */}
-          {drivers.map((driver) => {
+          {filteredDrivers.map((driver) => {
             const disabled = isDriverDisabled(driver.driver_number)
             return (
               <button
@@ -168,6 +210,12 @@ export default function DriverDropdown({
               </button>
             )
           })}
+
+          {filteredDrivers.length === 0 && (
+            <div className="px-4 py-3 text-sm text-gray-500">
+              No drivers found for "{searchQuery}".
+            </div>
+          )}
         </div>
       )}
     </div>
