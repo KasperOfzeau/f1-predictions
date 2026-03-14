@@ -122,7 +122,8 @@ type ApiMeeting = {
 /**
  * Get the last finished race/sprint event from the Open F1 API only (no DB).
  * Use this when the user is not logged in to avoid RLS on meetings/sessions.
- * Fetches current + previous year, picks the single most recent finished meeting.
+ * Fetches current + previous year, then picks the single most recent finished
+ * Race or Sprint session across all started meetings.
  */
 export async function getLastEventFromApi(): Promise<NextEvent | null> {
   const currentYear = new Date().getFullYear()
@@ -145,87 +146,86 @@ export async function getLastEventFromApi(): Promise<NextEvent | null> {
     parseMeetings(resPrevious),
   ])
 
-  const finished = [...currentMeetings, ...previousMeetings].filter((m) => {
-    const end = m.date_end ?? m.date_start
-    return end && end < now
-  })
-
-  const lastMeetingApi = finished.sort((a, b) => {
-    const endA = a.date_end ?? a.date_start ?? ''
-    const endB = b.date_end ?? b.date_start ?? ''
-    return endB.localeCompare(endA)
-  })[0]
-
-  if (!lastMeetingApi) return null
-
-  const sessionsRes = await fetch(
-    `${F1_API_URL}/sessions?meeting_key=${lastMeetingApi.meeting_key}`,
-    OPENF1_FETCH_OPTIONS
+  const startedMeetings = [...currentMeetings, ...previousMeetings].filter((m) =>
+    Boolean(m.date_start && m.date_start < now)
   )
-  if (!sessionsRes.ok) return null
 
-  const sessions = await sessionsRes.json()
-  if (!Array.isArray(sessions)) return null
+  const sortedMeetings = startedMeetings.sort((a, b) =>
+    (b.date_start ?? '').localeCompare(a.date_start ?? '')
+  )
 
-  const raceOrSprint = sessions
-    .filter(
-      (s: { session_name: string }) =>
-        s.session_name === 'Race' || s.session_name === 'Sprint'
+  for (const meetingApi of sortedMeetings) {
+    const sessionsRes = await fetch(
+      `${F1_API_URL}/sessions?meeting_key=${meetingApi.meeting_key}`,
+      OPENF1_FETCH_OPTIONS
     )
-    .filter((s: { date_end?: string; date_start?: string }) => {
-      const end = s.date_end ?? s.date_start
-      return end && end < now
-    })
-    .sort((a: { date_end?: string; date_start?: string }, b: { date_end?: string; date_start?: string }) => {
-      const endA = a.date_end ?? a.date_start ?? ''
-      const endB = b.date_end ?? b.date_start ?? ''
-      return endB.localeCompare(endA)
-    })
+    if (!sessionsRes.ok) continue
 
-  const lastSessionApi = raceOrSprint[0]
-  if (!lastSessionApi) return null
+    const sessions = await sessionsRes.json()
+    if (!Array.isArray(sessions)) continue
 
-  const meeting: Meeting = {
-    id: `api-${lastMeetingApi.meeting_key}`,
-    meeting_key: lastMeetingApi.meeting_key,
-    meeting_name: lastMeetingApi.meeting_name,
-    meeting_official_name: lastMeetingApi.meeting_official_name ?? lastMeetingApi.meeting_name,
-    location: lastMeetingApi.location,
-    country_key: lastMeetingApi.country_key,
-    country_code: lastMeetingApi.country_code,
-    country_name: lastMeetingApi.country_name,
-    country_flag: lastMeetingApi.country_flag ?? null,
-    circuit_key: lastMeetingApi.circuit_key,
-    circuit_short_name: lastMeetingApi.circuit_short_name,
-    circuit_type: lastMeetingApi.circuit_type,
-    circuit_image: lastMeetingApi.circuit_image ?? null,
-    gmt_offset: lastMeetingApi.gmt_offset,
-    date_start: lastMeetingApi.date_start,
-    date_end: lastMeetingApi.date_end ?? lastMeetingApi.date_start,
-    year: lastMeetingApi.year,
-    created_at: '',
-    updated_at: '',
+    const raceOrSprint = sessions
+      .filter(
+        (s: { session_name: string }) =>
+          s.session_name === 'Race' || s.session_name === 'Sprint'
+      )
+      .filter((s: { date_end?: string; date_start?: string }) => {
+        const end = s.date_end ?? s.date_start
+        return end && end < now
+      })
+      .sort((a: { date_end?: string; date_start?: string }, b: { date_end?: string; date_start?: string }) => {
+        const endA = a.date_end ?? a.date_start ?? ''
+        const endB = b.date_end ?? b.date_start ?? ''
+        return endB.localeCompare(endA)
+      })
+
+    const lastSessionApi = raceOrSprint[0]
+    if (!lastSessionApi) continue
+
+    const meeting: Meeting = {
+      id: `api-${meetingApi.meeting_key}`,
+      meeting_key: meetingApi.meeting_key,
+      meeting_name: meetingApi.meeting_name,
+      meeting_official_name: meetingApi.meeting_official_name ?? meetingApi.meeting_name,
+      location: meetingApi.location,
+      country_key: meetingApi.country_key,
+      country_code: meetingApi.country_code,
+      country_name: meetingApi.country_name,
+      country_flag: meetingApi.country_flag ?? null,
+      circuit_key: meetingApi.circuit_key,
+      circuit_short_name: meetingApi.circuit_short_name,
+      circuit_type: meetingApi.circuit_type,
+      circuit_image: meetingApi.circuit_image ?? null,
+      gmt_offset: meetingApi.gmt_offset,
+      date_start: meetingApi.date_start,
+      date_end: meetingApi.date_end ?? meetingApi.date_start,
+      year: meetingApi.year,
+      created_at: '',
+      updated_at: '',
+    }
+    const session: Session = {
+      id: `api-${lastSessionApi.session_key}`,
+      session_key: lastSessionApi.session_key,
+      session_type: lastSessionApi.session_type,
+      session_name: lastSessionApi.session_name,
+      date_start: lastSessionApi.date_start,
+      date_end: lastSessionApi.date_end ?? lastSessionApi.date_start,
+      meeting_key: lastSessionApi.meeting_key,
+      circuit_key: lastSessionApi.circuit_key,
+      circuit_short_name: lastSessionApi.circuit_short_name,
+      country_key: lastSessionApi.country_key,
+      country_code: lastSessionApi.country_code,
+      country_name: lastSessionApi.country_name,
+      location: lastSessionApi.location,
+      gmt_offset: lastSessionApi.gmt_offset,
+      year: lastSessionApi.year,
+      created_at: '',
+      updated_at: '',
+    }
+    return { session, meeting }
   }
-  const session: Session = {
-    id: `api-${lastSessionApi.session_key}`,
-    session_key: lastSessionApi.session_key,
-    session_type: lastSessionApi.session_type,
-    session_name: lastSessionApi.session_name,
-    date_start: lastSessionApi.date_start,
-    date_end: lastSessionApi.date_end ?? lastSessionApi.date_start,
-    meeting_key: lastSessionApi.meeting_key,
-    circuit_key: lastSessionApi.circuit_key,
-    circuit_short_name: lastSessionApi.circuit_short_name,
-    country_key: lastSessionApi.country_key,
-    country_code: lastSessionApi.country_code,
-    country_name: lastSessionApi.country_name,
-    location: lastSessionApi.location,
-    gmt_offset: lastSessionApi.gmt_offset,
-    year: lastSessionApi.year,
-    created_at: '',
-    updated_at: '',
-  }
-  return { session, meeting }
+
+  return null
 }
 
 export async function getNextEvent(): Promise<NextEvent | null> {
@@ -277,24 +277,38 @@ async function getLastEventWithClient(
 
   await ensureMeetingsSynced(supabase, currentYear)
 
-  let lastMeeting = await getLastFinishedMeeting(supabase, currentYear, now)
-  if (!lastMeeting) {
-    const previousYear = currentYear - 1
-    await ensureMeetingsSynced(supabase, previousYear)
-    lastMeeting = await getLastFinishedMeeting(supabase, previousYear, now)
+  const currentYearMeetings = await getStartedMeetings(supabase, currentYear, now)
+  for (const meeting of currentYearMeetings) {
+    await ensureSessionsSyncedForMeeting(supabase, meeting.meeting_key)
+
+    const lastSession = await getLastRaceOrSprintForMeeting(
+      supabase,
+      meeting.meeting_key,
+      now
+    )
+    if (lastSession) {
+      return { session: lastSession, meeting }
+    }
   }
-  if (!lastMeeting) return null
 
-  await ensureSessionsSyncedForMeeting(supabase, lastMeeting.meeting_key)
+  const previousYear = currentYear - 1
+  await ensureMeetingsSynced(supabase, previousYear)
 
-  const lastSession = await getLastRaceOrSprintForMeeting(
-    supabase,
-    lastMeeting.meeting_key,
-    now
-  )
-  if (!lastSession) return null
+  const previousYearMeetings = await getStartedMeetings(supabase, previousYear, now)
+  for (const meeting of previousYearMeetings) {
+    await ensureSessionsSyncedForMeeting(supabase, meeting.meeting_key)
 
-  return { session: lastSession, meeting: lastMeeting }
+    const lastSession = await getLastRaceOrSprintForMeeting(
+      supabase,
+      meeting.meeting_key,
+      now
+    )
+    if (lastSession) {
+      return { session: lastSession, meeting }
+    }
+  }
+
+  return null
 }
 
 export async function getAllMeetings(year: number): Promise<Meeting[]> {
@@ -455,7 +469,7 @@ async function getNextUpcomingMeeting(
   return data
 }
 
-async function getLastFinishedMeeting(
+async function getStartedMeetings(
   supabase: Awaited<ReturnType<typeof createClient>>,
   year: number,
   now: string
@@ -464,12 +478,10 @@ async function getLastFinishedMeeting(
     .from('meetings')
     .select('*')
     .eq('year', year)
-    .lt('date_end', now)
-    .order('date_end', { ascending: false })
-    .limit(1)
-    .single()
+    .lt('date_start', now)
+    .order('date_start', { ascending: false })
 
-  return data ?? null
+  return data ?? []
 }
 
 // -----------------------------------------------------------------------------

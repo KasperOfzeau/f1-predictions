@@ -39,7 +39,7 @@ export default function PreviousRaceCard({
   sharerAvatarUrl = null,
 }: PreviousRaceCardProps) {
   const [showResultModal, setShowResultModal] = useState(false)
-  const sessionLabel = lastEvent?.session.session_name === 'Sprint' ? 'Previous sprint' : 'Previous race'
+  const sessionLabel = 'Previous event'
   const noPredictionLabel = lastEvent?.session.session_name === 'Sprint'
     ? 'No prediction made for this sprint'
     : 'No prediction made for this race'
