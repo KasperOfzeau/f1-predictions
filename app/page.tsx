@@ -27,15 +27,6 @@ export const metadata: Metadata = {
   description: "Predict F1 race results and compete with your friends in pools",
 }
 
-function getDaysToGo(dateStart: string): number {
-  const start = new Date(dateStart)
-  const today = new Date()
-  start.setHours(0, 0, 0, 0)
-  today.setHours(0, 0, 0, 0)
-  const diffMs = start.getTime() - today.getTime()
-  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
-}
-
 const getCachedNextEventFromApi = unstable_cache(
   async () => getNextEventFromApi(),
   ['home-next-event-api'],
@@ -190,7 +181,6 @@ export default async function HomePage() {
               isLoggedIn={!!user}
               predictionAvailability={nextEventPredictionAvailability}
               hasPrediction={nextEventHasPrediction}
-              daysToGo={getDaysToGo(nextEvent.session.date_start)}
             />
           ) : null}
 
