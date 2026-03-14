@@ -111,6 +111,15 @@ export default function Footer() {
             >
               KasperOfzeau
             </a>
+            . Powered by the{' '}
+            <a
+              href="https://openf1.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-f1-red transition-colors"
+            >
+              OpenF1 API
+            </a>
           </p>
           <p className="text-amber-500/90">
             Site in development — things may occasionally go wrong.
