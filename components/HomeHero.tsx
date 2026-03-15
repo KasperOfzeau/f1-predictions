@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
@@ -28,12 +28,24 @@ type CountdownState = {
   segments: CountdownSegment[]
 }
 
-function getCountdownState(dateStart: string): CountdownState {
-  const diffMs = new Date(dateStart).getTime() - Date.now()
+function getCountdownState(dateStart: string, dateEnd: string, sessionName: string, now: number): CountdownState {
+  const startMs = new Date(dateStart).getTime()
+  const endMs = new Date(dateEnd).getTime()
+  const diffMs = startMs - now
 
-  if (diffMs <= 0) {
+  if (now >= startMs && now < endMs) {
     return {
-      status: 'Starting now',
+      status: `${sessionName} live now`,
+      segments: [
+        { value: '00', label: 'Hours' },
+        { value: '00', label: 'Minutes' },
+      ],
+    }
+  }
+
+  if (now >= endMs) {
+    return {
+      status: 'Waiting for next event',
       segments: [
         { value: '00', label: 'Hours' },
         { value: '00', label: 'Minutes' },
@@ -73,20 +85,20 @@ export default function HomeHero({
 }: HomeHeroProps) {
   const router = useRouter()
   const [showModal, setShowModal] = useState(false)
+  const [now, setNow] = useState(() => Date.now())
   const { session, meeting } = nextEvent
-  const [countdown, setCountdown] = useState(() =>
-    getCountdownState(session.date_start)
+  const countdown = useMemo(
+    () => getCountdownState(session.date_start, session.date_end, session.session_name, now),
+    [now, session.date_end, session.date_start, session.session_name]
   )
 
   useEffect(() => {
-    setCountdown(getCountdownState(session.date_start))
-
     const intervalId = window.setInterval(() => {
-      setCountdown(getCountdownState(session.date_start))
+      setNow(Date.now())
     }, 60 * 1000)
 
     return () => window.clearInterval(intervalId)
-  }, [session.date_start])
+  }, [])
 
   return (
     <div className="hero relative min-h-75 sm:min-h-112 md:min-h-128 w-full flex flex-col justify-start items-center pb-0 sm:pb-12 pt-8 sm:pt-12 md:pt-16">
@@ -105,7 +117,7 @@ export default function HomeHero({
       <div className="relative z-10 space-y-2.5 sm:space-y-3 text-center mt-8 sm:mt-12 md:mt-16 px-4">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/70 backdrop-blur-sm">
           <span className="h-2 w-2 rounded-full bg-f1-red" />
-          {session.session_name === 'Sprint' ? 'Sprint Weekend' : 'Race Weekend'}
+          {session.session_name === 'Sprint' ? 'Sprint' : 'Race'}
         </div>
         <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl text-white">
           {meeting.meeting_name.split(' ').slice(0, -2).join(' ')}{' '}

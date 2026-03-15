@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import type { Meeting, NextEvent, PredictionAvailability, Session } from '@/lib/types'
 import {
   ensureSessionsSyncedForMeeting,
+  getLatestStartedRaceOrSprintForMeeting,
   getLastRaceOrSprintForMeeting,
   getNextRaceOrSprintForMeeting,
   syncSessionsForMeeting,
@@ -230,61 +231,79 @@ export async function getLastEventFromApi(): Promise<NextEvent | null> {
 
 export async function getNextEvent(): Promise<NextEvent | null> {
   const supabase = await createClient()
-  const currentYear = new Date().getFullYear()
-  const now = new Date().toISOString()
+  return getNextEventWithClient(supabase)
+}
 
-  const hasMeetingsThisYear = await ensureMeetingsSynced(supabase, currentYear)
-  if (!hasMeetingsThisYear) return null
+export async function getNextEventForPublic(): Promise<NextEvent | null> {
+  const supabase = createAdminClient()
+  return getNextEventWithClient(supabase)
+}
 
-  const nextMeeting = await getNextUpcomingMeeting(supabase, currentYear, now)
-  if (!nextMeeting) return null
-
-  await ensureSessionsSyncedForMeeting(supabase, nextMeeting.meeting_key)
-
-  const nextSession = await getNextRaceOrSprintForMeeting(
-    supabase,
-    nextMeeting.meeting_key,
-    now
-  )
-  if (!nextSession) return null
-
-  return { session: nextSession, meeting: nextMeeting }
+export async function getLatestStartedEventForPublic(before?: string): Promise<NextEvent | null> {
+  const supabase = createAdminClient()
+  return getLatestStartedEventWithClient(supabase, before)
 }
 
 /**
  * Get the last finished race or sprint event (for "previous race" card).
  * Looks in current year first, then previous year (e.g. at start of new season).
  */
-export async function getLastEvent(): Promise<NextEvent | null> {
+export async function getLastEvent(before?: string): Promise<NextEvent | null> {
   const supabase = await createClient()
-  return getLastEventWithClient(supabase)
+  return getLastEventWithClient(supabase, before)
 }
 
 /**
  * Get the last finished race/sprint from the database using admin client.
  * Use on the public home page so it works for everyone (no RLS, no dependency on external API).
  */
-export async function getLastEventForPublic(): Promise<NextEvent | null> {
+export async function getLastEventForPublic(before?: string): Promise<NextEvent | null> {
   const supabase = createAdminClient()
-  return getLastEventWithClient(supabase)
+  return getLastEventWithClient(supabase, before)
 }
 
-async function getLastEventWithClient(
+async function getNextEventWithClient(
   supabase: Awaited<ReturnType<typeof createClient>>
 ): Promise<NextEvent | null> {
   const currentYear = new Date().getFullYear()
   const now = new Date().toISOString()
 
+  const hasMeetingsThisYear = await ensureMeetingsSynced(supabase, currentYear)
+  if (!hasMeetingsThisYear) return null
+
+  const upcomingMeetings = await getUpcomingMeetings(supabase, currentYear, now)
+  for (const meeting of upcomingMeetings) {
+    await ensureSessionsSyncedForMeeting(supabase, meeting.meeting_key)
+
+    const nextSession = await getNextRaceOrSprintForMeeting(
+      supabase,
+      meeting.meeting_key,
+      now
+    )
+    if (nextSession) {
+      return { session: nextSession, meeting }
+    }
+  }
+
+  return null
+}
+
+async function getLastEventWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  before = new Date().toISOString()
+): Promise<NextEvent | null> {
+  const currentYear = new Date(before).getFullYear()
+
   await ensureMeetingsSynced(supabase, currentYear)
 
-  const currentYearMeetings = await getStartedMeetings(supabase, currentYear, now)
+  const currentYearMeetings = await getStartedMeetings(supabase, currentYear, before)
   for (const meeting of currentYearMeetings) {
     await ensureSessionsSyncedForMeeting(supabase, meeting.meeting_key)
 
     const lastSession = await getLastRaceOrSprintForMeeting(
       supabase,
       meeting.meeting_key,
-      now
+      before
     )
     if (lastSession) {
       return { session: lastSession, meeting }
@@ -294,17 +313,59 @@ async function getLastEventWithClient(
   const previousYear = currentYear - 1
   await ensureMeetingsSynced(supabase, previousYear)
 
-  const previousYearMeetings = await getStartedMeetings(supabase, previousYear, now)
+  const previousYearMeetings = await getStartedMeetings(supabase, previousYear, before)
   for (const meeting of previousYearMeetings) {
     await ensureSessionsSyncedForMeeting(supabase, meeting.meeting_key)
 
     const lastSession = await getLastRaceOrSprintForMeeting(
       supabase,
       meeting.meeting_key,
-      now
+      before
     )
     if (lastSession) {
       return { session: lastSession, meeting }
+    }
+  }
+
+  return null
+}
+
+async function getLatestStartedEventWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  before = new Date().toISOString()
+): Promise<NextEvent | null> {
+  const currentYear = new Date(before).getFullYear()
+
+  await ensureMeetingsSynced(supabase, currentYear)
+
+  const currentYearMeetings = await getStartedMeetings(supabase, currentYear, before)
+  for (const meeting of currentYearMeetings) {
+    await ensureSessionsSyncedForMeeting(supabase, meeting.meeting_key)
+
+    const latestSession = await getLatestStartedRaceOrSprintForMeeting(
+      supabase,
+      meeting.meeting_key,
+      before
+    )
+    if (latestSession) {
+      return { session: latestSession, meeting }
+    }
+  }
+
+  const previousYear = currentYear - 1
+  await ensureMeetingsSynced(supabase, previousYear)
+
+  const previousYearMeetings = await getStartedMeetings(supabase, previousYear, before)
+  for (const meeting of previousYearMeetings) {
+    await ensureSessionsSyncedForMeeting(supabase, meeting.meeting_key)
+
+    const latestSession = await getLatestStartedRaceOrSprintForMeeting(
+      supabase,
+      meeting.meeting_key,
+      before
+    )
+    if (latestSession) {
+      return { session: latestSession, meeting }
     }
   }
 
@@ -446,12 +507,7 @@ async function ensureMeetingsSynced(
   return true
 }
 
-/**
- * Next meeting = meeting whose weekend is not over yet (date_end >= now).
- * This way we still show the current weekend (e.g. Australia) when we're
- * between date_start and date_end, instead of jumping to the next GP.
- */
-async function getNextUpcomingMeeting(
+async function getUpcomingMeetings(
   supabase: Awaited<ReturnType<typeof createClient>>,
   year: number,
   now: string
@@ -462,11 +518,8 @@ async function getNextUpcomingMeeting(
     .eq('year', year)
     .gte('date_end', now)
     .order('date_start', { ascending: true })
-    .limit(1)
-    .single()
 
-  if (!data) console.log('No upcoming meetings found')
-  return data
+  return data ?? []
 }
 
 async function getStartedMeetings(

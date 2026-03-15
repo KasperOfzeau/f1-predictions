@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 import GlobalLeaderboard from '@/components/GlobalLeaderboard'
-import { getNextEvent, getNextEventFromApi, getLastEventForPublic, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
+import { getNextEventForPublic, getLatestStartedEventForPublic, getLastEventForPublic, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
 import { getQualifyingForMeeting } from '@/lib/services/sessions'
 import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
 import { getPointsForPrediction } from '@/lib/services/scoring'
@@ -27,14 +27,20 @@ export const metadata: Metadata = {
   description: "Predict F1 race results and compete with your friends in pools",
 }
 
-const getCachedNextEventFromApi = unstable_cache(
-  async () => getNextEventFromApi(),
-  ['home-next-event-api'],
+const getCachedNextEventForPublic = unstable_cache(
+  async () => getNextEventForPublic(),
+  ['home-next-event-public'],
+  { revalidate: 60 }
+)
+
+const getCachedLatestStartedEventForPublic = unstable_cache(
+  async () => getLatestStartedEventForPublic(),
+  ['home-latest-started-event-public'],
   { revalidate: 60 }
 )
 
 const getCachedLastEventForPublic = unstable_cache(
-  async () => getLastEventForPublic(),
+  async (before?: string) => getLastEventForPublic(before),
   ['home-last-event-public'],
   { revalidate: 60 }
 )
@@ -50,17 +56,38 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch independent, read-heavy data in parallel.
-  const nextEventPromise = user ? getNextEvent() : getCachedNextEventFromApi()
-  const lastEventPromise = getCachedLastEventForPublic()
+  const nextEventPromise = getCachedNextEventForPublic()
+  const latestStartedEventPromise = getCachedLatestStartedEventForPublic()
+  const lastFinishedEventPromise = getCachedLastEventForPublic()
   const leaderboardPromise = getCachedGlobalLeaderboard(5).catch((e) => {
     console.error('Global leaderboard:', e)
     return []
   })
-  const [nextEvent, lastEvent, leaderboard] = await Promise.all([
+  const [nextEvent, latestStartedEvent, lastFinishedEvent, leaderboard] = await Promise.all([
     nextEventPromise,
-    lastEventPromise,
+    latestStartedEventPromise,
+    lastFinishedEventPromise,
     leaderboardPromise,
   ])
+
+  const now = new Date()
+  const latestStartedEventIsOngoing = latestStartedEvent
+    ? new Date(latestStartedEvent.session.date_start) <= now
+      && new Date(latestStartedEvent.session.date_end) > now
+    : false
+
+  const heroEvent = latestStartedEventIsOngoing
+    ? latestStartedEvent
+    : nextEvent ?? latestStartedEvent
+
+  let previousEvent = lastFinishedEvent
+  if (
+    heroEvent
+    && lastFinishedEvent
+    && heroEvent.session.session_key === lastFinishedEvent.session.session_key
+  ) {
+    previousEvent = await getCachedLastEventForPublic(heroEvent.session.date_end)
+  }
 
   // Fetch user's pools with member count (only when logged in)
   let poolsWithMemberCount: Array<{
@@ -116,14 +143,14 @@ export default async function HomePage() {
   // When logged in: prediction availability and existing prediction for next race (hero button + modal)
   let nextEventPredictionAvailability: { canPredict: boolean; reason?: string } = { canPredict: false, reason: 'No upcoming race' }
   let nextEventHasPrediction = false
-  if (user && nextEvent) {
+  if (user && heroEvent) {
     const [predictionAvailability, { data: nextPred }] = await Promise.all([
-      canMakePrediction(nextEvent.session, nextEvent.meeting.meeting_key),
+      canMakePrediction(heroEvent.session, heroEvent.meeting.meeting_key),
       supabase
         .from('predictions')
         .select('id')
         .eq('user_id', user.id)
-        .eq('session_key', nextEvent.session.session_key)
+        .eq('session_key', heroEvent.session.session_key)
         .single(),
     ])
     nextEventPredictionAvailability = predictionAvailability
@@ -135,13 +162,13 @@ export default async function HomePage() {
   let previousPoints: number | null = null
   let currentUsername: string | null = null
   let currentUserAvatarUrl: string | null = null
-  if (user && lastEvent) {
+  if (user && previousEvent) {
     const [{ data }, { data: profile }] = await Promise.all([
       supabase
         .from('predictions')
         .select('*')
         .eq('user_id', user.id)
-        .eq('session_key', lastEvent.session.session_key)
+        .eq('session_key', previousEvent.session.session_key)
         .single(),
       supabase
         .from('profiles')
@@ -150,16 +177,16 @@ export default async function HomePage() {
         .maybeSingle(),
     ])
     previousPrediction = data ?? null
-    previousPoints = await getPointsForPrediction(previousPrediction, lastEvent.session.session_key)
+    previousPoints = await getPointsForPrediction(previousPrediction, previousEvent.session.session_key)
     currentUsername = profile?.username ?? null
     currentUserAvatarUrl = profile?.avatar_url ?? null
   }
 
   // Qualifying session key voor drivers in result modal (race weekend = qualifying session voor driverlijst)
   let qualifyingSessionKey: number | null = null
-  if (lastEvent) {
-    const qualifyingSessions = await getQualifyingForMeeting(lastEvent.meeting.meeting_key)
-    const qualifyingName = lastEvent.session.session_name === 'Sprint'
+  if (previousEvent) {
+    const qualifyingSessions = await getQualifyingForMeeting(previousEvent.meeting.meeting_key)
+    const qualifyingName = previousEvent.session.session_name === 'Sprint'
       ? 'Sprint Qualifying'
       : 'Qualifying'
     const qualifyingSession = qualifyingSessions.find((s) => s.session_name === qualifyingName)
@@ -175,9 +202,9 @@ export default async function HomePage() {
     <div className="min-h-112 sm:min-h-128 md:min-h-144 bg-carbon-black">
       <Nav />
       <main>
-          {nextEvent ? (
+          {heroEvent ? (
             <HomeHero
-              nextEvent={nextEvent}
+              nextEvent={heroEvent}
               isLoggedIn={!!user}
               predictionAvailability={nextEventPredictionAvailability}
               hasPrediction={nextEventHasPrediction}
@@ -283,7 +310,7 @@ export default async function HomePage() {
               </div>
             </div>
             <PreviousRaceCard
-              lastEvent={lastEvent}
+              lastEvent={previousEvent}
               hasPrediction={!!previousPrediction}
               points={previousPoints}
               prediction={previousPrediction}
