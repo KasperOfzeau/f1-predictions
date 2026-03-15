@@ -32,6 +32,24 @@ async function getRaceResultBySessionKey(sessionKey: number): Promise<number[] |
 const POINTS_CORRECT_POSITION = 5
 const POINTS_IN_TOP_10 = 1
 
+async function hasSessionEnded(
+  sessionKey: number,
+  supabase: SupabaseClient
+): Promise<boolean> {
+  const { data: session } = await supabase
+    .from('sessions')
+    .select('date_start, date_end')
+    .eq('session_key', sessionKey)
+    .maybeSingle()
+
+  if (!session) return false
+
+  const endIso = session.date_end ?? session.date_start
+  if (!endIso) return false
+
+  return new Date(endIso) <= new Date()
+}
+
 /**
  * Score a prediction against race result:
  * - 5 points per correct position (right driver at right place)
@@ -77,6 +95,10 @@ export async function getPointsForPrediction(
 ): Promise<number | null> {
   if (!prediction) return null
 
+  const supabase = supabaseAdmin ?? (await createClient())
+  const sessionEnded = await hasSessionEnded(sessionKey, supabase)
+  if (!sessionEnded) return null
+
   if (prediction.points != null) {
     return prediction.points
   }
@@ -85,7 +107,6 @@ export async function getPointsForPrediction(
   if (!resultOrder || resultOrder.length < 10) return null
 
   const points = calculatePoints(prediction, resultOrder)
-  const supabase = supabaseAdmin ?? (await createClient())
   await supabase
     .from('predictions')
     .update({ points, updated_at: new Date().toISOString() })
