@@ -7,8 +7,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient, getAdminClientIfAvailable } from '@/lib/supabase/admin'
 import Nav from '@/components/Nav'
 import LogoutButton from '@/components/LogoutButton'
-import { getRecentPredictionsForUser } from '@/lib/services/profilePredictions'
-import ProfilePredictionsList from '@/components/ProfilePredictionsList'
+import { getRecentPredictionsForUser } from '@/lib/services/userPredictions'
+import UserPredictionsList from '@/components/UserPredictionsList'
 
 interface PageProps {
   params: Promise<{ username: string }>
@@ -146,10 +146,20 @@ export default async function ProfileByUsernamePage({ params }: PageProps) {
 
             {/* Predictions */}
             <div className="px-6 py-6 border-t border-zinc-200">
-              <h2 className="text-xl font-bold text-carbon-black mb-4">
-                {isOwnProfile ? 'My predictions' : 'Predictions'}
-              </h2>
-              <ProfilePredictionsList
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-xl font-bold text-carbon-black">
+                  {isOwnProfile ? 'My predictions' : 'Predictions'}
+                </h2>
+                {isOwnProfile && (
+                  <Link
+                    href="/predictions"
+                    className="inline-flex items-center rounded-full border-2 border-f1-red px-4 py-1.5 text-sm font-medium text-f1-red"
+                  >
+                    See all
+                  </Link>
+                )}
+              </div>
+              <UserPredictionsList
                 items={recentPredictions}
                 seasonPrediction={seasonPrediction ?? null}
                 seasonYear={currentSeasonYear}

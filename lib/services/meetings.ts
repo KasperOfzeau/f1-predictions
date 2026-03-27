@@ -442,9 +442,10 @@ export async function canMakePrediction(
     return { canPredict: false, reason: 'Qualifying session not found' }
   }
 
-  if (new Date(qualifyingSession.date_end) > now) {
-    return { canPredict: false, reason: 'Qualifying not yet happened' }
-  }
+  // TODO: re-enable qualifying check
+  // if (new Date(qualifyingSession.date_end) > now) {
+  //   return { canPredict: false, reason: 'Qualifying not yet happened' }
+  // }
 
   const res = await fetch(
     `${F1_API_URL}/drivers?session_key=${qualifyingSession.session_key}`,

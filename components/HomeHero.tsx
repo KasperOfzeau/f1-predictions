@@ -3,13 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import type { NextEvent, PredictionAvailability } from '@/lib/types'
-
-const PredictionModal = dynamic(() => import('./PredictionModal'), {
-  ssr: false,
-})
 
 interface HomeHeroProps {
   nextEvent: NextEvent
@@ -84,7 +79,6 @@ export default function HomeHero({
   hasPrediction,
 }: HomeHeroProps) {
   const router = useRouter()
-  const [showModal, setShowModal] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const { session, meeting } = nextEvent
   const countdown = useMemo(
@@ -146,32 +140,20 @@ export default function HomeHero({
       </div>
       <div className="relative z-10 mt-6 sm:mt-8 md:mt-10 flex justify-center">
         {isLoggedIn ? (
-          <>
-            <button
-              type="button"
-              onClick={() => predictionAvailability.canPredict && setShowModal(true)}
-              disabled={!predictionAvailability.canPredict}
-              className={`px-5 py-2 sm:px-6 rounded-full font-medium transition-colors border-2 sm:border-4 text-center text-sm sm:text-base ${
-                predictionAvailability.canPredict
-                  ? 'border-f1-red text-white cursor-pointer hover:bg-f1-red/20'
-                  : 'border-white/30 text-white/60 cursor-not-allowed opacity-70'
-              }`}
-            >
-              {predictionAvailability.canPredict
-                ? (hasPrediction ? 'Edit prediction' : 'Enter your prediction')
-                : predictionAvailability.reason || 'Predictions not available'}
-            </button>
-            <PredictionModal
-              isOpen={showModal}
-              onClose={() => setShowModal(false)}
-              onPredictionSaved={() => {
-                setShowModal(false)
-                router.refresh()
-              }}
-              session={session}
-              meeting={meeting}
-            />
-          </>
+          <button
+            type="button"
+            onClick={() => predictionAvailability.canPredict && router.push('/predictions/race')}
+            disabled={!predictionAvailability.canPredict}
+            className={`px-5 py-2 sm:px-6 rounded-full font-medium transition-colors border-2 sm:border-4 text-center text-sm sm:text-base ${
+              predictionAvailability.canPredict
+                ? 'border-f1-red text-white cursor-pointer hover:bg-f1-red/20'
+                : 'border-white/30 text-white/60 cursor-not-allowed opacity-70'
+            }`}
+          >
+            {predictionAvailability.canPredict
+              ? (hasPrediction ? 'Edit prediction' : 'Enter your prediction')
+              : predictionAvailability.reason || 'Predictions not available'}
+          </button>
         ) : (
           <Link
             href="/login"

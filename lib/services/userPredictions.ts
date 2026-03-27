@@ -21,18 +21,23 @@ export interface PredictionWithMeta {
  */
 export async function getRecentPredictionsForUser(
   userId: string,
-  limit = 5,
+  limit: number | null = 5,
   client?: SupabaseClient
 ): Promise<PredictionWithMeta[]> {
   const supabase = client ?? (await createClient())
 
-  const { data: rows, error } = await supabase
+  let query = supabase
     .from('predictions')
     .select('*')
     .eq('user_id', userId)
     .not('session_key', 'is', null)
     .order('updated_at', { ascending: false })
-    .limit(limit)
+
+  if (limit != null) {
+    query = query.limit(limit)
+  }
+
+  const { data: rows, error } = await query
 
   if (error || !rows?.length) return []
 
