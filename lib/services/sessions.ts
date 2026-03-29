@@ -81,13 +81,13 @@ export async function getNextRaceOrSprintForMeeting(
     .gte('date_start', now)
     .order('date_start', { ascending: true })
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  if (error || !data) {
+  if (error) {
     console.error('Error fetching next session:', error)
     return null
   }
-  return data
+  return data ?? null
 }
 
 export async function getLatestStartedRaceOrSprintForMeeting(
@@ -103,10 +103,10 @@ export async function getLatestStartedRaceOrSprintForMeeting(
     .lte('date_start', now)
     .order('date_start', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  if (error || !data) return null
-  return data
+  if (error) return null
+  return data ?? null
 }
 
 /**
@@ -125,10 +125,10 @@ export async function getLastRaceOrSprintForMeeting(
     .lt('date_end', now)
     .order('date_end', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  if (error || !data) return null
-  return data
+  if (error) return null
+  return data ?? null
 }
 
 // -----------------------------------------------------------------------------
@@ -140,7 +140,15 @@ export async function syncSessionsForMeeting(
   meetingKey: number
 ): Promise<void> {
   const res = await fetch(`${F1_API_URL}/sessions?meeting_key=${meetingKey}`, OPENF1_FETCH_OPTIONS)
-  if (!res.ok) throw new Error(`Sessions API request failed: ${res.statusText}`)
+  if (!res.ok) {
+    if (res.status === 401) {
+      console.warn(
+        `Skipping sessions sync for meeting ${meetingKey}: OpenF1 is temporarily unavailable during a live session`
+      )
+      return
+    }
+    throw new Error(`Sessions API request failed: ${res.statusText}`)
+  }
 
   const sessions = await res.json()
   const relevant = sessions.filter((s: { session_name: string }) =>

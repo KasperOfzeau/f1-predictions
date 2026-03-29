@@ -505,7 +505,14 @@ async function ensureMeetingsSynced(
     console.log('No meetings found for this year, syncing all meetings...')
     await syncAllMeetings(supabase, year)
   }
-  return true
+
+  const { data: afterSync } = await supabase
+    .from('meetings')
+    .select('meeting_key')
+    .eq('year', year)
+    .limit(1)
+
+  return Boolean(afterSync?.length)
 }
 
 async function getUpcomingMeetings(
@@ -547,7 +554,15 @@ async function syncAllMeetings(
   year: number
 ): Promise<void> {
   const res = await fetch(`${F1_API_URL}/meetings?year=${year}`, OPENF1_FETCH_OPTIONS)
-  if (!res.ok) throw new Error(`Meetings API request failed: ${res.statusText}`)
+  if (!res.ok) {
+    if (res.status === 401) {
+      console.warn(
+        `Skipping meetings sync for ${year}: OpenF1 is temporarily unavailable during a live session`
+      )
+      return
+    }
+    throw new Error(`Meetings API request failed: ${res.statusText}`)
+  }
 
   const apiMeetings = await res.json()
   const grandPrixMeetings = apiMeetings.filter((m: { meeting_name: string }) =>
