@@ -1,6 +1,6 @@
 'use client'
 
-const DISCORD_LINK = 'https://discord.gg/YCxPm4zU'
+const DISCORD_LINK = 'https://discord.gg/jTzcUjmwUN'
 
 export default function DiscordJoinBlock() {
   return (
