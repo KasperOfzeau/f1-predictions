@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import SettingsForm from '@/components/SettingsForm'
+import PushNotificationToggle from '@/components/PushNotificationToggle'
 import Nav from '@/components/Nav'
 
 export const metadata: Metadata = {
@@ -33,6 +34,14 @@ export default async function SettingsPage() {
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6 text-carbon-black">Account settings</h2>
             <SettingsForm user={user} profile={profile} />
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-6 mt-6">
+            <h2 className="text-2xl font-bold mb-2 text-carbon-black">Notifications</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Receive reminders before races start and when you haven&apos;t submitted your prediction yet.
+            </p>
+            <PushNotificationToggle />
           </div>
         </div>
       </main>
