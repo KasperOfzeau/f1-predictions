@@ -13,6 +13,7 @@ import PreviousRaceCard from '@/components/PreviousRaceCard'
 import HomeHero from '@/components/HomeHero'
 import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
 import DiscordJoinBlock from '@/components/DiscordJoinBlock'
+import ExpansionRoadmapBlock from '@/components/ExpansionRoadmapBlock'
 
 type PoolInfo = { id: string; name: string; description: string | null; created_at: string }
 type PoolMembership = {
@@ -218,7 +219,7 @@ export default async function HomePage() {
             <DiscordJoinBlock />
           </section>
 
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto px-6 pt-6 pb-16">
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto px-6 pt-6 pb-6">
             <div className="bg-white/5 rounded-xl border border-white/10 p-6">
               <div className="flex justify-between items-center gap-3 mb-4">
                 <h3 className="text-2xl font-semibold text-white">My pools</h3>
@@ -319,6 +320,10 @@ export default async function HomePage() {
               sharerName={currentUsername}
               sharerAvatarUrl={currentUserAvatarUrl}
             />
+          </section>
+
+          <section className="max-w-7xl mx-auto px-6 pb-16">
+            <ExpansionRoadmapBlock />
           </section>
       </main>
     </div>
