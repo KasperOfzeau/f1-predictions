@@ -53,12 +53,22 @@ export default function Footer() {
               ))}
               <li>
                 <a
-                  href="https://discord.gg/"
+                  href="https://discord.gg/jTzcUjmwUN"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   Discord
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/thepredictionpaddock/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                >
+                  Instagram
                 </a>
               </li>
             </ul>
