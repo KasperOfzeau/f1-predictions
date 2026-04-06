@@ -14,6 +14,7 @@ import HomeHero from '@/components/HomeHero'
 import SeasonPredictionsBlock from '@/components/SeasonPredictionsBlock'
 import DiscordJoinBlock from '@/components/DiscordJoinBlock'
 import ExpansionRoadmapBlock from '@/components/ExpansionRoadmapBlock'
+import FaqBlock from '@/components/FaqBlock'
 
 type PoolInfo = { id: string; name: string; description: string | null; created_at: string }
 type PoolMembership = {
@@ -320,6 +321,10 @@ export default async function HomePage() {
               sharerName={currentUsername}
               sharerAvatarUrl={currentUserAvatarUrl}
             />
+          </section>
+
+          <section className="max-w-7xl mx-auto px-6 pb-16">
+            <FaqBlock />
           </section>
 
           <section className="max-w-7xl mx-auto px-6 pb-16">
