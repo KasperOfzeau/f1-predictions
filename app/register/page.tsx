@@ -70,30 +70,57 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-carbon-black">
+    <div className="min-h-screen bg-carbon-black text-white">
       <Nav />
-      <main className="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="max-w-md w-full space-y-8 bg-white shadow rounded-lg p-8">
-          <div>
-            <h2 className="text-center text-3xl font-extrabold text-gray-900">
-              Create an account
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Or{' '}
-              <Link href="/login" className="font-medium text-f1-red hover:text-f1-red-hover">
-                log in if you already have an account
-              </Link>
-            </p>
+      <main>
+        <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-10 px-6 py-10 lg:grid-cols-[1fr_0.95fr] lg:gap-14 lg:py-16">
+          <div className="order-2 max-w-xl lg:order-1">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5 text-[11px] sm:text-xs uppercase tracking-[0.24em] text-white/70 backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-f1-red" />
+                Join The Paddock
+              </div>
+              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl">
+                Ready for <span className="text-f1-red">race weekend</span>?
+              </h1>
+              <p className="max-w-xl text-base text-white/70 sm:text-lg">
+                Make your predictions, join private pools and compete with friends throughout the season.
+              </p>
+              <p className="text-sm text-white/60">
+                Already have an account?{' '}
+                <Link
+                  href="/login"
+                  className="font-semibold text-f1-red transition-colors hover:text-white"
+                >
+                  Log in here
+                </Link>
+              </p>
+            </div>
           </div>
-          
-          <form className="mt-8 space-y-6" onSubmit={handleRegister}>
+
+          <div className="order-1 lg:order-2">
+            <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-center text-3xl font-semibold text-white">
+                    Create an account
+                  </h2>
+                  <p className="mt-3 text-center text-sm text-white/60">
+                    Or{' '}
+                    <Link href="/login" className="font-semibold text-f1-red transition-colors hover:text-white">
+                      log in if you already have an account
+                    </Link>
+                  </p>
+                </div>
+
+                <form className="mt-8 space-y-6" onSubmit={handleRegister}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="rounded-2xl border border-f1-red/30 bg-f1-red/10 px-4 py-3 text-sm text-red-100">
                 {error}
               </div>
             )}
 
-            <div className="rounded-md shadow-sm space-y-3">
+            <div className="space-y-3">
               <div>
                 <label htmlFor="full-name" className="sr-only">
                   Full name
@@ -103,7 +130,7 @@ export default function RegisterPage() {
                   name="name"
                   type="text"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-f1-red focus:outline-none"
                   placeholder="Full name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -119,13 +146,13 @@ export default function RegisterPage() {
                   name="username"
                   type="text"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-f1-red focus:outline-none"
                   placeholder="Username (3-20 characters)"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase())}
                   pattern="[a-zA-Z0-9_]{3,20}"
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-white/45">
                   Letters, numbers and underscore (_) only
                 </p>
               </div>
@@ -140,7 +167,7 @@ export default function RegisterPage() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-f1-red focus:outline-none"
                   placeholder="Email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -157,7 +184,7 @@ export default function RegisterPage() {
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-f1-red focus:outline-none"
                   placeholder="Password (min. 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -166,24 +193,27 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-center text-xs text-white/45">
               By registering, you agree to our{' '}
-              <Link href="/terms" className="font-medium text-f1-red hover:text-f1-red-hover">Terms of Service</Link>
+              <Link href="/terms" className="font-semibold text-f1-red transition-colors hover:text-white">Terms of Service</Link>
               {' '}and{' '}
-              <Link href="/privacy" className="font-medium text-f1-red hover:text-f1-red-hover">Privacy Policy</Link>.
+              <Link href="/privacy" className="font-semibold text-f1-red transition-colors hover:text-white">Privacy Policy</Link>.
             </p>
 
             <div>
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-f1-red hover:bg-f1-red-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-f1-red disabled:opacity-50"
+                className="flex w-full justify-center rounded-full border-2 border-f1-red px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-f1-red/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? 'Loading...' : 'Register'}
               </button>
             </div>
-          </form>
-        </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
