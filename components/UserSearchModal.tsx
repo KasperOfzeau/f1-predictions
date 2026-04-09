@@ -54,13 +54,13 @@ export default function UserSearchModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Invite users" size="md">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="mb-4 rounded-2xl border border-f1-red/20 bg-f1-red/10 px-4 py-3 text-sm text-red-600">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+        <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           {success}
         </div>
       )}
@@ -71,7 +71,7 @@ export default function UserSearchModal({
           placeholder="Search by username or name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-f1-red focus:outline-none"
         />
       </div>
 
@@ -87,10 +87,10 @@ export default function UserSearchModal({
         {visibleResults.map((user) => (
           <div
             key={user.id}
-            className="flex justify-between items-center p-3 hover:bg-gray-50 rounded"
+            className="flex items-center justify-between rounded-2xl p-3 transition-colors hover:bg-gray-50"
           >
             <div>
-              <p className="font-medium">@{user.username ?? ''}</p>
+              <p className="font-medium text-gray-900">@{user.username ?? ''}</p>
               <p className="text-sm text-gray-600">{user.full_name}</p>
             </div>
             <button
@@ -103,7 +103,7 @@ export default function UserSearchModal({
                 if (userId) onInvite(userId)
               }}
               disabled={loading}
-              className="bg-f1-red hover:bg-f1-red-hover text-white px-4 py-1 rounded text-sm disabled:opacity-50"
+              className="rounded-full bg-f1-red px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-f1-red-hover disabled:opacity-50"
             >
               {loading ? 'Sending...' : 'Invite'}
             </button>

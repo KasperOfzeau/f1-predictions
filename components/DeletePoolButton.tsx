@@ -43,7 +43,7 @@ export default function DeletePoolButton({ poolId, poolName }: DeletePoolButtonP
     <>
       <button
         onClick={() => setShowConfirm(true)}
-        className="text-red-600 hover:text-red-700 text-sm font-medium"
+        className="rounded-full border border-f1-red/35 px-4 py-2.5 text-sm font-medium text-red-200 transition-colors hover:bg-f1-red/10 hover:text-white"
       >
         Delete pool
       </button>

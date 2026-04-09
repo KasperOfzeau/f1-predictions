@@ -52,13 +52,13 @@ export default function CreatePoolForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="rounded-2xl border border-f1-red/30 bg-f1-red/10 px-4 py-3 text-sm text-red-100">
           {error}
         </div>
       )}
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="name" className="mb-2 block text-sm font-medium text-white/85">
           Pool Name *
         </label>
         <input
@@ -67,16 +67,16 @@ export default function CreatePoolForm() {
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-f1-red focus:outline-none"
           maxLength={50}
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-white/45">
           e.g., GP2 Engine support group, No Michael No That&apos;s So Not Right, DTS Believers Anonymous
         </p>
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="description" className="mb-2 block text-sm font-medium text-white/85">
           Description (optional)
         </label>
         <textarea
@@ -84,11 +84,11 @@ export default function CreatePoolForm() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white placeholder:text-white/35 focus:border-f1-red focus:outline-none"
           placeholder="e.g. Winner gets a Lego set!"
           maxLength={500}
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-white/45">
           {description.length}/500 characters
         </p>
       </div>
@@ -97,14 +97,14 @@ export default function CreatePoolForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-f1-red hover:bg-f1-red-hover text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 rounded-full bg-f1-red px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-f1-red-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Creating...' : 'Create pool'}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          className="rounded-full border border-white/15 px-5 py-3 text-sm font-medium text-white/80 transition-colors hover:border-white/25 hover:bg-white/6"
         >
           Cancel
         </button>

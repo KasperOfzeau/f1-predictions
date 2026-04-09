@@ -88,25 +88,31 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
   })
 
   return (
-    <div className="min-h-screen bg-carbon-black">
+    <div className="min-h-screen bg-carbon-black text-white">
       <Nav />
 
-      <main className="max-w-5xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Pool Header */}
-          <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <div className="flex justify-between items-start mb-4 flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">{pool.name}</h1>
-                {pool.description && (
-                  <p className="text-gray-600">{pool.description}</p>
-                )}
-                <p className="text-sm text-gray-500 mt-2">
-                  Created {new Date(pool.created_at).toLocaleDateString('en-US')}
-                </p>
+      <main>
+        <section className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 sm:py-12">
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex-1 space-y-4">
+                <div className="space-y-3">
+                  <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">{pool.name}</h1>
+                  {pool.description && (
+                    <p className="max-w-3xl text-base text-white/70 sm:text-lg">{pool.description}</p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-3 text-sm text-white/60">
+                  <div className="rounded-full border border-white/10 bg-white/6 px-4 py-2">
+                    Created {new Date(pool.created_at).toLocaleDateString('en-US')}
+                  </div>
+                  <div className="rounded-full border border-white/10 bg-white/6 px-4 py-2">
+                    {members.length} member{members.length === 1 ? '' : 's'}
+                  </div>
+                </div>
               </div>
               {isAdmin && (
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <InviteUserButton poolId={pool.id} />
                   <DeletePoolButton poolId={pool.id} poolName={pool.name} />
                 </div>
@@ -114,25 +120,25 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
             </div>
           </div>
 
-          {/* Error Message */}
           {membersError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="rounded-2xl border border-f1-red/30 bg-f1-red/10 px-4 py-3 text-sm text-red-100">
               Error loading members: {membersError.message}
             </div>
           )}
 
-          {/* Not a Member Warning */}
           {!currentMember && !membersError && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-6">
+            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
               You are not a member of this pool.
             </div>
           )}
 
-          {/* Members List */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-bold mb-4">
-              Members ({members?.length || 0})
-            </h2>
+          <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
+            <div className="mb-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-white/45">Championship standings</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Members</h2>
+              </div>
+            </div>
             <PoolMembersList
               members={membersSortedByScore}
               isAdmin={isAdmin}
@@ -141,7 +147,7 @@ export default async function PoolDetailPage({ params }: { params: Promise<{ id:
               seasonPointsByUser={seasonPointsByUser}
             />
           </div>
-        </div>
+        </section>
       </main>
     </div>
   )
