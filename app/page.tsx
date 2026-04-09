@@ -6,7 +6,6 @@ import Link from 'next/link'
 import Nav from '@/components/Nav'
 import GlobalLeaderboard from '@/components/GlobalLeaderboard'
 import { getNextEventForPublic, getLatestStartedEventForPublic, getLastEventForPublic, canMakePrediction, isBeforeFirstRaceWeekend } from '@/lib/services/meetings'
-import { getQualifyingForMeeting } from '@/lib/services/sessions'
 import { getGlobalLeaderboard } from '@/lib/services/leaderboard'
 import { getPointsForPrediction } from '@/lib/services/scoring'
 import PreviousRaceCard from '@/components/PreviousRaceCard'
@@ -142,7 +141,7 @@ export default async function HomePage() {
     }))
   }
 
-  // When logged in: prediction availability and existing prediction for next race (hero button + modal)
+  // When logged in: prediction availability and existing prediction for next race
   let nextEventPredictionAvailability: { canPredict: boolean; reason?: string } = { canPredict: false, reason: 'No upcoming race' }
   let nextEventHasPrediction = false
   if (user && heroEvent) {
@@ -162,38 +161,16 @@ export default async function HomePage() {
   // When logged in: check if user has a prediction for the last race and get points
   let previousPrediction: Prediction | null = null
   let previousPoints: number | null = null
-  let currentUsername: string | null = null
-  let currentUserAvatarUrl: string | null = null
   if (user && previousEvent) {
-    const [{ data }, { data: profile }] = await Promise.all([
-      supabase
-        .from('predictions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('session_key', previousEvent.session.session_key)
-        .single(),
-      supabase
-        .from('profiles')
-        .select('full_name, username, avatar_url')
-        .eq('id', user.id)
-        .maybeSingle(),
-    ])
+    const { data } = await supabase
+      .from('predictions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('session_key', previousEvent.session.session_key)
+      .single()
+
     previousPrediction = data ?? null
     previousPoints = await getPointsForPrediction(previousPrediction, previousEvent.session.session_key)
-    currentUsername = profile?.username ?? null
-    currentUserAvatarUrl = profile?.avatar_url ?? null
-  }
-
-  // Qualifying session key voor drivers in result modal (race weekend = qualifying session voor driverlijst)
-  let qualifyingSessionKey: number | null = null
-  if (previousEvent) {
-    const qualifyingSessions = await getQualifyingForMeeting(previousEvent.meeting.meeting_key)
-    const qualifyingName = previousEvent.session.session_name === 'Sprint'
-      ? 'Sprint Qualifying'
-      : 'Qualifying'
-    const qualifyingSession = qualifyingSessions.find((s) => s.session_name === qualifyingName)
-      ?? qualifyingSessions[0] ?? null
-    qualifyingSessionKey = qualifyingSession?.session_key ?? null
   }
 
   // Season predictions block: alleen tonen voor ingelogde gebruikers vóór eerste raceweekend
@@ -315,11 +292,7 @@ export default async function HomePage() {
               lastEvent={previousEvent}
               hasPrediction={!!previousPrediction}
               points={previousPoints}
-              prediction={previousPrediction}
               isLoggedIn={!!user}
-              qualifyingSessionKey={qualifyingSessionKey}
-              sharerName={currentUsername}
-              sharerAvatarUrl={currentUserAvatarUrl}
             />
           </section>
 

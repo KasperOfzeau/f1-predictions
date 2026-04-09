@@ -1,13 +1,7 @@
-'use client'
-
-import { useState } from 'react'
 import Image from 'next/image'
-import dynamic from 'next/dynamic'
-import type { NextEvent, Prediction } from '@/lib/types'
-
-const PreviousRaceResultModal = dynamic(() => import('./PreviousRaceResultModal'), {
-  ssr: false,
-})
+import Link from 'next/link'
+import type { NextEvent } from '@/lib/types'
+import { getResultPageHref } from '@/lib/resultPage'
 
 function getCircuitImageSrc(circuitShortName: string): string {
   const base = circuitShortName.replace(/\s+/g, '-')
@@ -19,26 +13,16 @@ interface PreviousRaceCardProps {
   lastEvent: NextEvent | null
   hasPrediction: boolean
   points: number | null
-  prediction: Prediction | null
   /** When true, show prediction/points section; when false, only race name + date */
   isLoggedIn?: boolean
-  /** Qualifying session key – used to fetch drivers for the result modal */
-  qualifyingSessionKey?: number | null
-  sharerName?: string | null
-  sharerAvatarUrl?: string | null
 }
 
 export default function PreviousRaceCard({
   lastEvent,
   hasPrediction,
   points,
-  prediction,
   isLoggedIn = false,
-  qualifyingSessionKey = null,
-  sharerName = null,
-  sharerAvatarUrl = null,
 }: PreviousRaceCardProps) {
-  const [showResultModal, setShowResultModal] = useState(false)
   const sessionLabel = 'Previous event'
   const noPredictionLabel = lastEvent?.session.session_name === 'Sprint'
     ? 'No prediction made for this sprint'
@@ -73,19 +57,18 @@ export default function PreviousRaceCard({
         )}
 
         {isLoggedIn && lastEvent && (
-          <div className="mt-6 space-y-3">
+          <div className="mt-6 flex flex-col items-center gap-4">
             {hasPrediction ? (
               <>
                 <p className="text-white/80 text-lg">
                   Points: <span className="font-bold text-white">{points !== null ? points : '—'}</span>
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setShowResultModal(true)}
+                <Link
+                  href={getResultPageHref(lastEvent.session.session_key)}
                   className="px-5 py-2 rounded-full font-medium transition-colors border-2 border-f1-red text-white hover:bg-f1-red/20 cursor-pointer"
                 >
                   View result
-                </button>
+                </Link>
               </>
             ) : (
               <p className="text-white/50 text-sm">{noPredictionLabel}</p>
@@ -93,23 +76,6 @@ export default function PreviousRaceCard({
           </div>
         )}
       </div>
-
-      {lastEvent && (
-        <PreviousRaceResultModal
-          isOpen={showResultModal}
-          onClose={() => setShowResultModal(false)}
-          sessionKey={lastEvent.session.session_key}
-          meetingKey={lastEvent.meeting.meeting_key}
-          qualifyingSessionKey={qualifyingSessionKey}
-          meetingName={lastEvent.meeting.meeting_name}
-          sessionName={lastEvent.session.session_name}
-          prediction={prediction}
-          points={points}
-          sharerName={sharerName}
-          sharerAvatarUrl={sharerAvatarUrl}
-          allowShare={isLoggedIn}
-        />
-      )}
     </div>
   )
 }

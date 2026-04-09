@@ -1,13 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import type { PredictionWithMeta } from '@/lib/services/userPredictions'
 import type { SeasonPrediction } from '@/lib/types'
-
-const PreviousRaceResultModal = dynamic(() => import('./PreviousRaceResultModal'), {
-  ssr: false,
-})
+import { getResultPageHref } from '@/lib/resultPage'
 
 const SeasonPredictionViewModal = dynamic(() => import('./SeasonPredictionViewModal'), {
   ssr: false,
@@ -30,10 +28,8 @@ export default function UserPredictionsList({
   seasonYear,
   isOwnProfile = true,
   sharerName = null,
-  sharerAvatarUrl = null,
   theme = 'light',
 }: UserPredictionsListProps) {
-  const [selected, setSelected] = useState<PredictionWithMeta | null>(null)
   const [showSeasonModal, setShowSeasonModal] = useState(false)
 
   const hasSeason = seasonPrediction != null
@@ -52,7 +48,7 @@ export default function UserPredictionsList({
     ? 'grid grid-cols-1 gap-3'
     : 'divide-y divide-zinc-200'
   const itemClassName = theme === 'dark'
-    ? 'w-full rounded-xl border border-white/10 bg-white/5 p-4 text-left transition-all hover:border-f1-red hover:bg-white/7 cursor-pointer'
+    ? 'flex w-full items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4 text-left transition-all hover:border-f1-red hover:bg-white/7 cursor-pointer'
     : 'w-full text-left py-3 -mx-1 px-1 flex items-center justify-between gap-4 transition-colors hover:bg-zinc-50 rounded cursor-pointer'
   const titleClassName = theme === 'dark'
     ? 'font-medium text-white truncate'
@@ -98,11 +94,14 @@ export default function UserPredictionsList({
             year: 'numeric',
           })
           const sessionLabel = item.sessionName ?? 'Race'
+          const href = getResultPageHref(
+            item.sessionKey,
+            !isOwnProfile ? sharerName : null
+          )
           return (
             <li key={item.prediction.id}>
-              <button
-                type="button"
-                onClick={() => setSelected(item)}
+              <Link
+                href={href}
                 className={itemClassName}
               >
                 <div className="min-w-0">
@@ -121,28 +120,11 @@ export default function UserPredictionsList({
                   )}
                   <span className="text-sm text-f1-red font-medium">View</span>
                 </div>
-              </button>
+              </Link>
             </li>
           )
         })}
       </ul>
-
-      {selected && (
-        <PreviousRaceResultModal
-          isOpen={!!selected}
-          onClose={() => setSelected(null)}
-          sessionKey={selected.sessionKey}
-          meetingKey={selected.meetingKey}
-          qualifyingSessionKey={selected.qualifyingSessionKey}
-          meetingName={selected.meetingName}
-          sessionName={selected.sessionName}
-          prediction={selected.prediction}
-          points={selected.points}
-          sharerName={sharerName}
-          sharerAvatarUrl={sharerAvatarUrl}
-          allowShare={isOwnProfile}
-        />
-      )}
 
       {seasonPrediction && (
         <SeasonPredictionViewModal
