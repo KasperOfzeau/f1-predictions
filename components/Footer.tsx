@@ -1,14 +1,23 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 const productLinks = [
   { href: '/', label: 'Home' },
   { href: '/pools/create', label: 'Create pool' },
 ]
 
-const accountLinks = [
+const guestAccountLinks = [
   { href: '/login', label: 'Login' },
   { href: '/register', label: 'Register' },
+]
+
+const authenticatedAccountLinks = [
+  { href: '/profile', label: 'Profile' },
+  { href: '/settings', label: 'Settings' },
 ]
 
 const legalLinks = [
@@ -16,7 +25,36 @@ const legalLinks = [
   { href: '/privacy', label: 'Privacy Policy' },
 ]
 
+const supabase = createClient()
+
 export default function Footer() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const syncAuthState = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (isMounted) {
+        setIsLoggedIn(Boolean(user))
+      }
+    }
+
+    syncAuthState()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(Boolean(session?.user))
+    })
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const accountLinks = isLoggedIn ? authenticatedAccountLinks : guestAccountLinks
+
   return (
     <footer className="mt-auto border-t border-zinc-800 bg-[#0a0a0c]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
