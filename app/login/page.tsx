@@ -15,7 +15,7 @@ function getNoticeFromSearchParams(searchParams: ReturnType<typeof useSearchPara
   if (searchParams.get('registered') === '1') {
     return {
       type: 'info',
-      message: 'Please check your email and click the confirmation link before logging in.',
+      message: 'Your account has been created. Log in below.',
     }
   }
 
