@@ -283,10 +283,16 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/5 rounded-xl border border-white/10 p-6 flex flex-col min-h-0">
-              <h3 className="text-2xl font-semibold text-white mb-4 shrink-0">Global leaderboard</h3>
+              <h3 className="mb-4 shrink-0 text-2xl font-semibold text-white">Global leaderboard</h3>
               <div className="flex-1 min-h-0 flex flex-col">
                 <GlobalLeaderboard entries={leaderboard} />
               </div>
+              <Link
+                href="/leaderboard"
+                className="mt-4 inline-flex items-center justify-center self-start rounded-full border-2 border-f1-red px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-f1-red/20"
+              >
+                View all
+              </Link>
             </div>
             <PreviousRaceCard
               lastEvent={previousEvent}
