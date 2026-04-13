@@ -10,17 +10,47 @@ export const revalidate = 60
  */
 export async function GET(request: NextRequest) {
   const sessionKey = request.nextUrl.searchParams.get('session_key')
-  if (!sessionKey || !/^\d+$/.test(sessionKey)) {
+  const meetingKey = request.nextUrl.searchParams.get('meeting_key')
+
+  if (sessionKey && meetingKey) {
     return NextResponse.json(
-      { error: 'Missing or invalid session_key' },
+      { error: 'Use either session_key or meeting_key, not both' },
       { status: 400 }
     )
   }
 
-  const key = parseInt(sessionKey, 10)
+  if (!sessionKey && !meetingKey) {
+    return NextResponse.json(
+      { error: 'Missing session_key or meeting_key' },
+      { status: 400 }
+    )
+  }
 
   try {
-    const res = await fetch(`${F1_API_URL}/drivers?session_key=${key}`, {
+    let apiUrl: string
+
+    if (sessionKey) {
+      if (!/^\d+$/.test(sessionKey)) {
+        return NextResponse.json(
+          { error: 'Missing or invalid session_key' },
+          { status: 400 }
+        )
+      }
+
+      const key = parseInt(sessionKey, 10)
+      apiUrl = `${F1_API_URL}/drivers?session_key=${key}`
+    } else {
+      if (!(meetingKey === 'latest' || /^\d+$/.test(meetingKey!))) {
+        return NextResponse.json(
+          { error: 'Missing or invalid meeting_key' },
+          { status: 400 }
+        )
+      }
+
+      apiUrl = `${F1_API_URL}/drivers?meeting_key=${meetingKey}`
+    }
+
+    const res = await fetch(apiUrl, {
       next: { revalidate },
     })
     if (!res.ok) {
@@ -29,10 +59,16 @@ export async function GET(request: NextRequest) {
         { status: 502 }
       )
     }
+
     const driversData = await res.json()
-    const drivers = (driversData as Driver[]).sort(
-      (a, b) => a.driver_number - b.driver_number
-    )
+    const drivers = meetingKey
+      ? Array.from(
+          new Map(
+            (driversData as Driver[]).map((driver) => [driver.driver_number, driver])
+          ).values()
+        ).sort((a, b) => a.driver_number - b.driver_number)
+      : (driversData as Driver[]).sort((a, b) => a.driver_number - b.driver_number)
+
     return NextResponse.json({ drivers })
   } catch {
     return NextResponse.json(

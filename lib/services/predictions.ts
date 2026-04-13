@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Driver, Prediction } from '@/lib/types'
 
 const F1_API_URL = 'https://api.openf1.org/v1'
+const driversByMeetingRequestCache = new Map<string, Promise<Driver[]>>()
 
 export interface TeamFromDrivers {
   name: string
@@ -35,26 +36,31 @@ export async function getDriversForSession(sessionKey: number): Promise<Driver[]
  * Use this for season predictions and for race result predictions when you have a meeting key.
  */
 export async function getDriversForMeeting(meetingKey: number | 'latest'): Promise<Driver[]> {
-  try {
-    const response = await fetch(`${F1_API_URL}/drivers?meeting_key=${meetingKey}`)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch drivers: ${response.statusText}`)
-    }
-
-    const data: Driver[] = await response.json()
-
-    // API returns one row per driver per session; deduplicate by driver_number
-    const byNumber = new Map<number, Driver>()
-    data.forEach((d) => {
-      if (!byNumber.has(d.driver_number)) byNumber.set(d.driver_number, d)
-    })
-
-    return Array.from(byNumber.values()).sort((a, b) => a.driver_number - b.driver_number)
-  } catch (error) {
-    console.error('Error fetching drivers for meeting:', error)
-    throw error
+  const cacheKey = String(meetingKey)
+  const cachedRequest = driversByMeetingRequestCache.get(cacheKey)
+  if (cachedRequest) {
+    return cachedRequest
   }
+
+  const request = (async () => {
+    try {
+      const response = await fetch(`/api/drivers?meeting_key=${encodeURIComponent(cacheKey)}`)
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch drivers: ${response.statusText}`)
+      }
+
+      const payload = await response.json()
+      return payload.drivers ?? []
+    } catch (error) {
+      driversByMeetingRequestCache.delete(cacheKey)
+      console.error('Error fetching drivers for meeting:', error)
+      throw error
+    }
+  })()
+
+  driversByMeetingRequestCache.set(cacheKey, request)
+  return request
 }
 
 /**
