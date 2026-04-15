@@ -64,7 +64,7 @@ function getCountdownState(dateStart: string, dateEnd: string, sessionName: stri
   }
 
   return {
-    status: `${days} day${days === 1 ? '' : 's'} to go`,
+    status: `Until lights out`,
     segments: [
       { value: String(days), label: 'Days' },
       { value: String(hours).padStart(2, '0'), label: 'Hours' },
