@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     .lte('date_start', inTwoHours.toISOString())
 
   if (!upcomingSessions?.length) {
-    return NextResponse.json({ ok: true, sent: 0, reason: 'No upcoming sessions' })
+    return NextResponse.json({ ok: true, sent: 0, reason: 'No upcoming sessions from' + inOneHour.toISOString() + ' to ' + inTwoHours.toISOString() })
   }
 
   let totalSent = 0
